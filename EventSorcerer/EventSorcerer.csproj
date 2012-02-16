@@ -42,7 +42,13 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AggregateRoot.cs" />
+    <Compile Include="Command.cs" />
     <Compile Include="Event.cs" />
+    <Compile Include="ICommandHandler.cs" />
+    <Compile Include="ICommandBus.cs" />
+    <Compile Include="IEventBus.cs" />
+    <Compile Include="IEventHandler.cs" />
+    <Compile Include="IRepository.cs" />
     <Compile Include="Message.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
