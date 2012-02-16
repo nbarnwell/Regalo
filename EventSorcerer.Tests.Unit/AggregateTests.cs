@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
 using System.Runtime.Serialization;
 using NUnit.Framework;
 
@@ -45,15 +47,28 @@ namespace EventSorcerer.Tests.Unit
             user.ChangePassword("newpassword");
 
             // Act
-            IEnumerable<Event> before = user.GetUncommittedEvents();
             IEnumerable<Event> expectedBefore = new Event[] { new UserChangedPassword(user.Id, "newpassword") };
-            user.AcceptUncommittedEvents();
-            IEnumerable<Event> after = user.GetUncommittedEvents();
             IEnumerable<Event> expectedAfter = new Event[0];
 
+            IEnumerable<Event> before = user.GetUncommittedEvents();
+            user.AcceptUncommittedEvents();
+            IEnumerable<Event> after = user.GetUncommittedEvents();
+            
             // Assert
             CollectionAssert.AreEqual(expectedBefore, before);
             CollectionAssert.AreEqual(expectedAfter, after);
+        }
+
+        [Test]
+        public void InvokingBehaviour_GivenAggregateWithInvariantLogic_ShouldFailIfInvariantIsNotSatisfied()
+        {
+            // Arrange
+            var user = new User();
+            user.Id = Guid.NewGuid().ToString();
+            user.ChangePassword("newpassword");
+
+            // Act / Assert
+            Assert.Throws<InvalidOperationException>(() => user.ChangePassword("newpassword"), "Expected exception stating the new password must be different the the previous one.");
         }
     }
 
@@ -64,7 +79,7 @@ namespace EventSorcerer.Tests.Unit
     public class UserChangedPassword : Event
     {
         public string UserId { get; private set; }
-        public string Newpassword { get; private set; }
+        public string NewPassword { get; private set; }
 
         public UserChangedPassword(string userId, string newpassword)
         {
@@ -72,14 +87,14 @@ namespace EventSorcerer.Tests.Unit
             if (newpassword == null) throw new ArgumentNullException("newpassword");
 
             UserId = userId;
-            Newpassword = newpassword;
+            NewPassword = newpassword;
         }
 
         public bool Equals(UserChangedPassword other)
         {
             if (ReferenceEquals(null, other)) return false;
             if (ReferenceEquals(this, other)) return true;
-            return Equals(other.UserId, UserId) && Equals(other.Newpassword, Newpassword);
+            return Equals(other.UserId, UserId) && Equals(other.NewPassword, NewPassword);
         }
 
         public override bool Equals(object obj)
@@ -94,7 +109,7 @@ namespace EventSorcerer.Tests.Unit
         {
             unchecked
             {
-                return ((UserId != null ? UserId.GetHashCode() : 0) * 397) ^ (Newpassword != null ? Newpassword.GetHashCode() : 0);
+                return ((UserId != null ? UserId.GetHashCode() : 0) * 397) ^ (NewPassword != null ? NewPassword.GetHashCode() : 0);
             }
         }
 
@@ -119,11 +134,19 @@ namespace EventSorcerer.Tests.Unit
 
     public class User : AggregateRoot
     {
+        private string _password;
+
         public void ChangePassword(string newpassword)
         {
             if (string.IsNullOrWhiteSpace(newpassword)) throw new InvalidOperationException("New password cannot be empty or whitespace.");
+            if (newpassword == _password) throw new InvalidOperationException("New password cannot be the same as the old password.");
          
             Record(new UserChangedPassword(Id, newpassword));
+        }
+
+        private void Apply(UserChangedPassword evt)
+        {
+            _password = evt.NewPassword;
         }
     }
 
@@ -136,6 +159,19 @@ namespace EventSorcerer.Tests.Unit
         protected void Record(Event evt)
         {
             _uncommittedEvents.Add(evt);
+
+            var applyMethod = GetType().GetMethods(BindingFlags.Instance | BindingFlags.NonPublic)
+                .Where(m => m.Name == "Apply")
+                .Where(m =>
+                           {
+                               var parameters = m.GetParameters();
+                               return parameters.Length == 1 && parameters[0].ParameterType == evt.GetType();
+                           }).SingleOrDefault();
+
+            if (applyMethod != null)
+            {
+                applyMethod.Invoke(this, BindingFlags.Instance | BindingFlags.NonPublic, null, new object[] { evt }, null);
+            }
         }
 
         public IEnumerable<Event> GetUncommittedEvents()
