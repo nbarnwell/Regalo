@@ -1,9 +1,5 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Runtime.Serialization;
 using NUnit.Framework;
 
 namespace EventSorcerer.Tests.Unit
@@ -70,6 +66,21 @@ namespace EventSorcerer.Tests.Unit
             // Act / Assert
             Assert.Throws<InvalidOperationException>(() => user.ChangePassword("newpassword"), "Expected exception stating the new password must be different the the previous one.");
         }
+
+        [Test]
+        public void ApplyingPreviouslyGeneratedEvents_GivenNewAggregateObject_ShouldBringAggregateBackToPreviousState()
+        {
+            // Arrange
+            var user = new User();
+            user.Id = Guid.NewGuid().ToString();
+            var events = new Event[] { new UserChangedPassword(user.Id, "newpassword"), new UserChangedPassword(user.Id, "newerpassword") };
+
+            // Act
+            user.ApplyAll(events);
+
+            // Assert
+            Assert.Throws<InvalidOperationException>(() => user.ChangePassword("newerpassword"), "Expected exception stating the new password must be different the the previous one, indicating that previous events have replayed successfully.");
+        }
     }
 
     // ReSharper restore InconsistentNaming
@@ -124,14 +135,6 @@ namespace EventSorcerer.Tests.Unit
         }
     }
 
-    public abstract class Event : Message
-    {
-    }
-
-    public abstract class Message
-    {
-    }
-
     public class User : AggregateRoot
     {
         private string _password;
@@ -147,41 +150,6 @@ namespace EventSorcerer.Tests.Unit
         private void Apply(UserChangedPassword evt)
         {
             _password = evt.NewPassword;
-        }
-    }
-
-    public abstract class AggregateRoot
-    {
-        private IList<Event> _uncommittedEvents = new List<Event>(); 
-
-        public string Id { get; set; }
-        
-        protected void Record(Event evt)
-        {
-            _uncommittedEvents.Add(evt);
-
-            var applyMethod = GetType().GetMethods(BindingFlags.Instance | BindingFlags.NonPublic)
-                .Where(m => m.Name == "Apply")
-                .Where(m =>
-                           {
-                               var parameters = m.GetParameters();
-                               return parameters.Length == 1 && parameters[0].ParameterType == evt.GetType();
-                           }).SingleOrDefault();
-
-            if (applyMethod != null)
-            {
-                applyMethod.Invoke(this, BindingFlags.Instance | BindingFlags.NonPublic, null, new object[] { evt }, null);
-            }
-        }
-
-        public IEnumerable<Event> GetUncommittedEvents()
-        {
-            return _uncommittedEvents;
-        }
-
-        public void AcceptUncommittedEvents()
-        {
-            _uncommittedEvents = new List<Event>();
         }
     }
 }
