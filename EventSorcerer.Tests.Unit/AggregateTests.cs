@@ -89,7 +89,7 @@ namespace EventSorcerer.Tests.Unit
             var user = new User();
             user.Id = Guid.NewGuid().ToString();
             var events = new Event[] { new UserChangedPassword(user.Id, "newpassword"), new UserChangedPassword(user.Id, "newpassword") };
-
+            
             // Act
             user.ApplyAll(events);
 

@@ -19,7 +19,7 @@ namespace EventSorcerer
 
             if (applyMethod != null)
             {
-                applyMethod.Invoke(this, BindingFlags.Instance | BindingFlags.NonPublic, null, new object[] { evt }, null);
+                applyMethod.Invoke(this, new object[] { evt });
             }
         }
 
@@ -62,7 +62,7 @@ namespace EventSorcerer
 
                 if (applyMethod != null)
                 {
-                    applyMethod.Invoke(this, BindingFlags.Instance | BindingFlags.NonPublic, null, new object[] { evt }, null);
+                    applyMethod.Invoke(this, new object[] { evt });
                 }
             }
         }
