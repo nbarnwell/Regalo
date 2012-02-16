@@ -81,6 +81,21 @@ namespace EventSorcerer.Tests.Unit
             // Assert
             Assert.Throws<InvalidOperationException>(() => user.ChangePassword("newerpassword"), "Expected exception stating the new password must be different the the previous one, indicating that previous events have replayed successfully.");
         }
+
+        [Test]
+        public void ApplyingPreviousEvents_GivenEventsThatWouldNotSatisfyCurrentInvariantLogic_ShouldNotFail()
+        {
+            // Arrange
+            var user = new User();
+            user.Id = Guid.NewGuid().ToString();
+            var events = new Event[] { new UserChangedPassword(user.Id, "newpassword"), new UserChangedPassword(user.Id, "newpassword") };
+
+            // Act
+            user.ApplyAll(events);
+
+            // Assert
+            Assert.Throws<InvalidOperationException>(() => user.ChangePassword("newpassword"), "Expected exception stating the new password must be different the the previous one, indicating that previous events have replayed successfully.");
+        }
     }
 
     // ReSharper restore InconsistentNaming
