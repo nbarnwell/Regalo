@@ -35,6 +35,26 @@ namespace EventSorcerer.Tests.Unit
             // Assert
             CollectionAssert.AreEqual(expected, actual);
         }
+
+        [Test]
+        public void AcceptingEvents_GivenAggregateWithUncommittedEvents_ShouldClearUncommittedEvents()
+        {
+            // Arrange
+            var user = new User();
+            user.Id = Guid.NewGuid().ToString();
+            user.ChangePassword("newpassword");
+
+            // Act
+            IEnumerable<Event> before = user.GetUncommittedEvents();
+            IEnumerable<Event> expectedBefore = new Event[] { new UserChangedPassword(user.Id, "newpassword") };
+            user.AcceptUncommittedEvents();
+            IEnumerable<Event> after = user.GetUncommittedEvents();
+            IEnumerable<Event> expectedAfter = new Event[0];
+
+            // Assert
+            CollectionAssert.AreEqual(expectedBefore, before);
+            CollectionAssert.AreEqual(expectedAfter, after);
+        }
     }
 
     // ReSharper restore InconsistentNaming
@@ -109,7 +129,7 @@ namespace EventSorcerer.Tests.Unit
 
     public abstract class AggregateRoot
     {
-        private readonly IList<Event> _uncommittedEvents = new List<Event>(); 
+        private IList<Event> _uncommittedEvents = new List<Event>(); 
 
         public string Id { get; set; }
         
@@ -121,6 +141,11 @@ namespace EventSorcerer.Tests.Unit
         public IEnumerable<Event> GetUncommittedEvents()
         {
             return _uncommittedEvents;
+        }
+
+        public void AcceptUncommittedEvents()
+        {
+            _uncommittedEvents = new List<Event>();
         }
     }
 }
