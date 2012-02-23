@@ -1,9 +1,8 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 
-namespace EventSorcerer
+namespace Regalo
 {
     public abstract class AggregateRoot
     {

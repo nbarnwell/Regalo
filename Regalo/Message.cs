@@ -2,7 +2,7 @@ using System;
 using System.Collections;
 using System.Text;
 
-namespace EventSorcerer
+namespace Regalo
 {
     public abstract class Message
     {

@@ -1,9 +1,9 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EventSorcerer", "EventSorcerer\EventSorcerer.csproj", "{80473978-8D0F-4AD4-983E-600E516D49AB}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Regalo", "Regalo\Regalo.csproj", "{80473978-8D0F-4AD4-983E-600E516D49AB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EventSorcerer.Tests.Unit", "EventSorcerer.Tests.Unit\EventSorcerer.Tests.Unit.csproj", "{09055902-1429-4A6F-B3A7-01C3C2715FF1}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Regalo.Tests.Unit", "Regalo.Tests.Unit\Regalo.Tests.Unit.csproj", "{09055902-1429-4A6F-B3A7-01C3C2715FF1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

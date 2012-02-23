@@ -1,4 +1,4 @@
-﻿namespace EventSorcerer
+﻿namespace Regalo
 {
     public interface ICommandHandler<TCommand>
     {

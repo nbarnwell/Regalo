@@ -1,4 +1,4 @@
-namespace EventSorcerer
+namespace Regalo
 {
     public class Command : Message
     {
