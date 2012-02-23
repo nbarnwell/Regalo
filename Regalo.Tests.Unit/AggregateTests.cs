@@ -148,7 +148,7 @@ namespace Regalo.Tests.Unit
             // Arrange
             string orderId = Guid.NewGuid().ToString();
             var evt = new ItemsAddedToOrder(orderId, null, 12);
-            var expected = string.Format("ItemsAddedToOrder event for aggregate {0} with Sku: \"{1}\", Quantity: {2}", orderId, "<null>", evt.Quantity);
+            var expected = string.Format("ItemsAddedToOrder event for aggregate {0} with Sku: {1}, Quantity: {2}", orderId, "<null>", evt.Quantity);
 
             // Act
             string asString = evt.ToString();
