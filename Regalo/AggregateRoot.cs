@@ -54,10 +54,11 @@ namespace EventSorcerer
                 var eventType = evt.GetType();
 
                 MethodInfo applyMethod;
-                if (!methodIndex.TryGetValue(eventType.Name, out applyMethod))
+                if (methodIndex.Count == 0 || !methodIndex.TryGetValue(eventType.Name, out applyMethod))
                 {
+                    // Find and cache the apply method, even if there isn't one (so we don't try looking again)
                     applyMethod = GetApplyMethod(evt);
-                    if (applyMethod != null) methodIndex.Add(eventType.Name, applyMethod);
+                    methodIndex.Add(eventType.Name, applyMethod);
                 }
 
                 if (applyMethod != null)
