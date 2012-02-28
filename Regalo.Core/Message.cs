@@ -10,8 +10,6 @@ namespace Regalo.Core
 
         protected Message(string aggregateId)
         {
-            if (aggregateId == null) throw new ArgumentNullException("aggregateId");
-
             AggregateId = aggregateId;
         }
 

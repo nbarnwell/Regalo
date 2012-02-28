@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using Raven.Client;
 using Regalo.Core;
 
@@ -29,12 +30,20 @@ namespace Regalo.EventSourcing.Raven
 
                 return aggregateRoot;
             }
-
         }
 
         public void Save(TAggregateRoot item)
         {
-            throw new System.NotImplementedException();
+            IEnumerable<Event> events = item.GetUncommittedEvents();
+            using (var session = _documentStore.OpenSession())
+            {
+                foreach (var evt in events)
+                {
+                    session.Store(new EventContainer(evt));
+                }
+
+                session.SaveChanges();
+            }
         }
     }
 }
