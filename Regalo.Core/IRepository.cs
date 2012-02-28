@@ -1,4 +1,4 @@
-﻿namespace Regalo
+﻿namespace Regalo.Core
 {
     public interface IRepository<T>
         where T : AggregateRoot, new()

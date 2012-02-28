@@ -1,4 +1,4 @@
-namespace Regalo
+namespace Regalo.Core
 {
     public abstract class Event : Message
     {

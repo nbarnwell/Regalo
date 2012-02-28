@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using NUnit.Framework;
 
-namespace Regalo.Tests.Unit
+namespace Regalo.Core.Tests.Unit
 {
     // ReSharper disable InconsistentNaming
     [TestFixture]

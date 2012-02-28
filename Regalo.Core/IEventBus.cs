@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Regalo
+namespace Regalo.Core
 {
     public interface IEventBus
     {
