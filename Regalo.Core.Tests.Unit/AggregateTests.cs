@@ -27,8 +27,8 @@ namespace Regalo.Core.Tests.Unit
 
             // Act
             user.ChangePassword("newpassword");
-            IEnumerable<Event> actual = user.GetUncommittedEvents();
-            IEnumerable<Event> expected = new Event[] { new UserChangedPassword(user.Id, "newpassword") };
+            IEnumerable<object> actual = user.GetUncommittedEvents();
+            IEnumerable<object> expected = new [] { new UserChangedPassword(user.Id, "newpassword") };
             
             // Assert
             CollectionAssert.AreEqual(expected, actual);
@@ -43,12 +43,12 @@ namespace Regalo.Core.Tests.Unit
             user.ChangePassword("newpassword");
 
             // Act
-            IEnumerable<Event> expectedBefore = new Event[] { new UserChangedPassword(user.Id, "newpassword") };
-            IEnumerable<Event> expectedAfter = new Event[0];
+            IEnumerable<object> expectedBefore = new[] { new UserChangedPassword(user.Id, "newpassword") };
+            IEnumerable<object> expectedAfter = new object[0];
 
-            IEnumerable<Event> before = user.GetUncommittedEvents();
+            IEnumerable<object> before = user.GetUncommittedEvents();
             user.AcceptUncommittedEvents();
-            IEnumerable<Event> after = user.GetUncommittedEvents();
+            IEnumerable<object> after = user.GetUncommittedEvents();
             
             // Assert
             CollectionAssert.AreEqual(expectedBefore, before);
@@ -73,7 +73,7 @@ namespace Regalo.Core.Tests.Unit
             // Arrange
             var user = new User();
             user.Id = Guid.NewGuid().ToString();
-            var events = new Event[] { new UserChangedPassword(user.Id, "newpassword"), new UserChangedPassword(user.Id, "newerpassword") };
+            var events = new object[] { new UserChangedPassword(user.Id, "newpassword"), new UserChangedPassword(user.Id, "newerpassword") };
 
             // Act
             user.ApplyAll(events);
@@ -88,7 +88,7 @@ namespace Regalo.Core.Tests.Unit
             // Arrange
             var user = new User();
             user.Id = Guid.NewGuid().ToString();
-            var events = new Event[] { new UserChangedPassword(user.Id, "newpassword"), new UserChangedPassword(user.Id, "newpassword") };
+            var events = new object[] { new UserChangedPassword(user.Id, "newpassword"), new UserChangedPassword(user.Id, "newpassword") };
             
             // Act
             user.ApplyAll(events);
@@ -162,11 +162,13 @@ namespace Regalo.Core.Tests.Unit
 
     public class TransactionPlaced : Event
     {
+        public string AggregateId { get; private set; }
         public decimal Amount { get; private set; }
         public string[] Categories { get; private set; }
 
-        public TransactionPlaced(string accountId, decimal amount, string[] categories) : base(accountId)
+        public TransactionPlaced(string accountId, decimal amount, string[] categories)
         {
+            AggregateId = accountId;
             Amount = amount;
             Categories = categories;
         }
@@ -175,45 +177,38 @@ namespace Regalo.Core.Tests.Unit
         {
             if (ReferenceEquals(null, other)) return false;
             if (ReferenceEquals(this, other)) return true;
-            return base.Equals(other) && other.Amount == Amount && Equals(other.Categories, Categories);
+            return Equals(other.AggregateId, AggregateId) && other.Amount == Amount && Equals(other.Categories, Categories);
         }
 
         public override bool Equals(object obj)
         {
             if (ReferenceEquals(null, obj)) return false;
             if (ReferenceEquals(this, obj)) return true;
-            return Equals(obj as TransactionPlaced);
+            if (obj.GetType() != typeof(TransactionPlaced)) return false;
+            return Equals((TransactionPlaced)obj);
         }
 
         public override int GetHashCode()
         {
             unchecked
             {
-                int result = base.GetHashCode();
-                result = (result * 397) ^ Amount.GetHashCode();
-                result = (result * 397) ^ (Categories != null ? Categories.GetHashCode() : 0);
+                int result = (AggregateId != null ? AggregateId.GetHashCode() : 0);
+                result = (result*397) ^ Amount.GetHashCode();
+                result = (result*397) ^ (Categories != null ? Categories.GetHashCode() : 0);
                 return result;
             }
-        }
-
-        public static bool operator ==(TransactionPlaced left, TransactionPlaced right)
-        {
-            return Equals(left, right);
-        }
-
-        public static bool operator !=(TransactionPlaced left, TransactionPlaced right)
-        {
-            return !Equals(left, right);
         }
     }
 
     public class ItemsAddedToOrder : Event
     {
+        public string AggregateId { get; private set; }
         public string Sku { get; private set; }
         public uint Quantity { get; private set; }
 
-        public ItemsAddedToOrder(string orderId, string sku, uint quantity) : base(orderId)
+        public ItemsAddedToOrder(string orderId, string sku, uint quantity)
         {
+            AggregateId = orderId;
             Sku = sku;
             Quantity = quantity;
         }
@@ -222,47 +217,39 @@ namespace Regalo.Core.Tests.Unit
         {
             if (ReferenceEquals(null, other)) return false;
             if (ReferenceEquals(this, other)) return true;
-            return base.Equals(other) && Equals(other.Sku, Sku) && other.Quantity == Quantity;
+            return Equals(other.AggregateId, AggregateId) && Equals(other.Sku, Sku) && other.Quantity == Quantity;
         }
 
         public override bool Equals(object obj)
         {
             if (ReferenceEquals(null, obj)) return false;
             if (ReferenceEquals(this, obj)) return true;
-            return Equals(obj as ItemsAddedToOrder);
+            if (obj.GetType() != typeof(ItemsAddedToOrder)) return false;
+            return Equals((ItemsAddedToOrder)obj);
         }
 
         public override int GetHashCode()
         {
             unchecked
             {
-                int result = base.GetHashCode();
-                result = (result * 397) ^ (Sku != null ? Sku.GetHashCode() : 0);
-                result = (result * 397) ^ Quantity.GetHashCode();
+                int result = (AggregateId != null ? AggregateId.GetHashCode() : 0);
+                result = (result*397) ^ (Sku != null ? Sku.GetHashCode() : 0);
+                result = (result*397) ^ Quantity.GetHashCode();
                 return result;
             }
-        }
-
-        public static bool operator ==(ItemsAddedToOrder left, ItemsAddedToOrder right)
-        {
-            return Equals(left, right);
-        }
-
-        public static bool operator !=(ItemsAddedToOrder left, ItemsAddedToOrder right)
-        {
-            return !Equals(left, right);
         }
     }
 
     public class UserChangedPassword : Event
     {
+        public string AggregateId { get; private set; }
         public string NewPassword { get; private set; }
 
         public UserChangedPassword(string userId, string newpassword)
-            : base(userId)
         {
             if (newpassword == null) throw new ArgumentNullException("newpassword");
 
+            AggregateId = userId;
             NewPassword = newpassword;
         }
 
@@ -270,32 +257,23 @@ namespace Regalo.Core.Tests.Unit
         {
             if (ReferenceEquals(null, other)) return false;
             if (ReferenceEquals(this, other)) return true;
-            return base.Equals(other) && Equals(other.NewPassword, NewPassword);
+            return Equals(other.AggregateId, AggregateId) && Equals(other.NewPassword, NewPassword);
         }
 
         public override bool Equals(object obj)
         {
             if (ReferenceEquals(null, obj)) return false;
             if (ReferenceEquals(this, obj)) return true;
-            return Equals(obj as UserChangedPassword);
+            if (obj.GetType() != typeof(UserChangedPassword)) return false;
+            return Equals((UserChangedPassword)obj);
         }
 
         public override int GetHashCode()
         {
             unchecked
             {
-                return (base.GetHashCode() * 397) ^ (NewPassword != null ? NewPassword.GetHashCode() : 0);
+                return ((AggregateId != null ? AggregateId.GetHashCode() : 0)*397) ^ (NewPassword != null ? NewPassword.GetHashCode() : 0);
             }
-        }
-
-        public static bool operator ==(UserChangedPassword left, UserChangedPassword right)
-        {
-            return Equals(left, right);
-        }
-
-        public static bool operator !=(UserChangedPassword left, UserChangedPassword right)
-        {
-            return !Equals(left, right);
         }
     }
 

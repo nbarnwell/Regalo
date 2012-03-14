@@ -6,13 +6,6 @@ namespace Regalo.Core
 {
     public abstract class Message
     {
-        public string AggregateId { get; set; }
-
-        protected Message(string aggregateId)
-        {
-            AggregateId = aggregateId;
-        }
-
         public override string ToString()
         {
             // Event or Command?
@@ -22,9 +15,15 @@ namespace Regalo.Core
             var properties = type.GetProperties();
             var propertyList = new StringBuilder();
 
+            string aggregateId = "<not set>";
+
             foreach (var propertyInfo in properties)
             {
-                if (propertyInfo.Name == "AggregateId") continue;
+                if (propertyInfo.Name == "AggregateId")
+                {
+                    aggregateId = propertyInfo.GetValue(this, null).ToString();
+                    continue;
+                }
 
                 if (propertyList.Length > 0) propertyList.Append(", ");
 
@@ -48,39 +47,9 @@ namespace Regalo.Core
                 }
             }
 
-            return string.Format("{0} {1} for aggregate {2} with {3}", type.Name, messageTypeString, AggregateId, propertyList);
+            return string.Format("{0} {1} for aggregate {2} with {3}", type.Name, messageTypeString, aggregateId, propertyList);
         }
 
         protected abstract string GetMessageTypeAsString();
-
-        public bool Equals(Message other)
-        {
-            if (ReferenceEquals(null, other)) return false;
-            if (ReferenceEquals(this, other)) return true;
-            return Equals(other.AggregateId, AggregateId);
-        }
-
-        public override bool Equals(object obj)
-        {
-            if (ReferenceEquals(null, obj)) return false;
-            if (ReferenceEquals(this, obj)) return true;
-            if (obj.GetType() != typeof(Message)) return false;
-            return Equals((Message)obj);
-        }
-
-        public override int GetHashCode()
-        {
-            return (AggregateId != null ? AggregateId.GetHashCode() : 0);
-        }
-
-        public static bool operator ==(Message left, Message right)
-        {
-            return Equals(left, right);
-        }
-
-        public static bool operator !=(Message left, Message right)
-        {
-            return !Equals(left, right);
-        }
     }
 }

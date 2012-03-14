@@ -6,11 +6,11 @@ namespace Regalo.Core
 {
     public abstract class AggregateRoot
     {
-        private IList<Event> _uncommittedEvents = new List<Event>(); 
+        private IList<object> _uncommittedEvents = new List<object>(); 
 
         public string Id { get; set; }
         
-        protected void Record(Event evt)
+        protected void Record(object evt)
         {
             _uncommittedEvents.Add(evt);
 
@@ -22,17 +22,17 @@ namespace Regalo.Core
             }
         }
 
-        public IEnumerable<Event> GetUncommittedEvents()
+        public IEnumerable<object> GetUncommittedEvents()
         {
             return _uncommittedEvents;
         }
 
         public void AcceptUncommittedEvents()
         {
-            _uncommittedEvents = new List<Event>();
+            _uncommittedEvents = new List<object>();
         }
 
-        private MethodInfo GetApplyMethod(Event evt)
+        private MethodInfo GetApplyMethod(object evt)
         {
             var applyMethod = GetType().GetMethods(BindingFlags.Instance | BindingFlags.NonPublic)
                 .Where(m => m.Name == "Apply")
@@ -44,7 +44,7 @@ namespace Regalo.Core
             return applyMethod;
         }
 
-        public void ApplyAll(IEnumerable<Event> events)
+        public void ApplyAll(IEnumerable<object> events)
         {
             var methodIndex = new Dictionary<string, MethodInfo>();
 
