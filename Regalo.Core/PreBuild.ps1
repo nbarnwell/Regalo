@@ -1,9 +1,8 @@
 param($assemblyInfoFilename)
 
 $version = git describe --tags --long
-$version = $version -replace "v", ""
 
-$matched = $version -match "^(\d)\.(\d)\.(\d)\-(\d)-([A-Za-z0-9]{8})$"
+$matched = $version -match "^v(\d+)\.(\d+)\.(\d+)\-(\d+)-([A-Za-z0-9]{8})$"
 
 $majorVersion = $Matches[1]
 $minorVersion = $Matches[2]
