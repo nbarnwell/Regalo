@@ -60,9 +60,31 @@ namespace Regalo.EventSourcing.Raven.Tests.Unit
 
     public class CustomerCreated : Event
     {
-        public CustomerCreated(string id) : base(id)
+        public string AggregateId { get; set; }
+
+        public CustomerCreated(string customerId)
         {
-            
+            AggregateId = customerId;
+        }
+
+        public bool Equals(CustomerCreated other)
+        {
+            if (ReferenceEquals(null, other)) return false;
+            if (ReferenceEquals(this, other)) return true;
+            return Equals(other.AggregateId, AggregateId);
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj)) return false;
+            if (ReferenceEquals(this, obj)) return true;
+            if (obj.GetType() != typeof(CustomerCreated)) return false;
+            return Equals((CustomerCreated)obj);
+        }
+
+        public override int GetHashCode()
+        {
+            return (AggregateId != null ? AggregateId.GetHashCode() : 0);
         }
     }
 }

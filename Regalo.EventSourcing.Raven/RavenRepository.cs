@@ -19,7 +19,7 @@ namespace Regalo.EventSourcing.Raven
             using (var session = _documentStore.OpenSession())
             {
                 var events = (from container in session.Query<EventContainer>()
-                              where container.Event.AggregateId == id
+                              where container.AggregateId == id
                               select container.Event).ToList();
 
                 if (events.Count == 0) return null;
@@ -34,7 +34,7 @@ namespace Regalo.EventSourcing.Raven
 
         public void Save(TAggregateRoot item)
         {
-            IEnumerable<Event> events = item.GetUncommittedEvents();
+            IEnumerable<object> events = item.GetUncommittedEvents();
             using (var session = _documentStore.OpenSession())
             {
                 foreach (var evt in events)

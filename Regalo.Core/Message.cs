@@ -19,7 +19,7 @@ namespace Regalo.Core
 
             foreach (var propertyInfo in properties)
             {
-                if (propertyInfo.Name == "AggregateId")
+                if (propertyInfo.Name == Conventions.AggregateIdPropertyName)
                 {
                     aggregateId = propertyInfo.GetValue(this, null).ToString();
                     continue;
