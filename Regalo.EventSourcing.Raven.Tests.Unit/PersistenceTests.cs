@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using NUnit.Framework;
 using Raven.Client;
+using Raven.Client.Document;
 using Raven.Client.Embedded;
 using Regalo.Core;
 
@@ -29,12 +30,14 @@ namespace Regalo.EventSourcing.Raven.Tests.Unit
         public void Saving_GivenNewAggregate_ShouldAllowReloading()
         {
             // Arrange
+            Conventions.SetAggregatesMustImplementApplymethods(true);
             IDocumentStore documentStore = new EmbeddableDocumentStore { RunInMemory = true };
             documentStore.Initialize();
             IRepository<Customer> repository = new RavenRepository<Customer>(documentStore);
 
             // Act
             var customer = new Customer();
+            customer.Signup();
             string id = customer.Id;
             repository.Save(customer);
             customer = repository.Get(id);
@@ -47,27 +50,27 @@ namespace Regalo.EventSourcing.Raven.Tests.Unit
 
     public class Customer : AggregateRoot
     {
-        public Customer()
+        public void Signup()
         {
-            Record(new CustomerCreated(Guid.NewGuid().ToString()));
+            Record(new CustomerSignedUp(Guid.NewGuid().ToString()));
         }
 
-        private void Apply(CustomerCreated evt)
+        private void Apply(CustomerSignedUp evt)
         {
             Id = evt.AggregateId;
         }
     }
 
-    public class CustomerCreated : Event
+    public class CustomerSignedUp : Event
     {
         public string AggregateId { get; set; }
 
-        public CustomerCreated(string customerId)
+        public CustomerSignedUp(string customerId)
         {
             AggregateId = customerId;
         }
 
-        public bool Equals(CustomerCreated other)
+        public bool Equals(CustomerSignedUp other)
         {
             if (ReferenceEquals(null, other)) return false;
             if (ReferenceEquals(this, other)) return true;
@@ -78,8 +81,8 @@ namespace Regalo.EventSourcing.Raven.Tests.Unit
         {
             if (ReferenceEquals(null, obj)) return false;
             if (ReferenceEquals(this, obj)) return true;
-            if (obj.GetType() != typeof(CustomerCreated)) return false;
-            return Equals((CustomerCreated)obj);
+            if (obj.GetType() != typeof(CustomerSignedUp)) return false;
+            return Equals((CustomerSignedUp)obj);
         }
 
         public override int GetHashCode()

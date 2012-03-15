@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -58,6 +59,11 @@ namespace Regalo.Core
                     // Find and cache the apply method, even if there isn't one (so we don't try looking again)
                     applyMethod = GetApplyMethod(evt);
                     methodIndex.Add(eventType.Name, applyMethod);
+                }
+
+                if (Conventions.AggregatesMustImplementApplyMethods && applyMethod == null)
+                {
+                    throw new InvalidOperationException(string.Format("Class {0} does not implement Apply({1} evt)", this.GetType().Name, eventType.Name));
                 }
 
                 if (applyMethod != null)
