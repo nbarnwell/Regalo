@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Reflection;
+using Newtonsoft.Json;
 using Regalo.Core;
 
 namespace Regalo.EventSourcing.Raven
@@ -7,6 +8,8 @@ namespace Regalo.EventSourcing.Raven
     public class EventContainer
     {
         public string AggregateId { get; private set; }
+
+        [JsonProperty(TypeNameHandling = TypeNameHandling.All)]
         public object Event { get; private set; }
 
         public EventContainer(object evt)

@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using NUnit.Framework;
 using Raven.Client;
 using Raven.Client.Document;
-using Raven.Client.Embedded;
 using Regalo.Core;
 
 namespace Regalo.EventSourcing.Raven.Tests.Unit
@@ -11,13 +9,27 @@ namespace Regalo.EventSourcing.Raven.Tests.Unit
     [TestFixture]
     public class PersistenceTests
     {
+        private IDocumentStore _documentStore;
+
+        [SetUp]
+        public void SetUp()
+        {
+            _documentStore = new DocumentStore {Url = "http://localhost:8080", DefaultDatabase = "Regalo.Core.Test"};
+            _documentStore.Initialize();
+        }
+
+        [TearDown]
+        public void TearDown()
+        {
+            _documentStore.Dispose();
+            _documentStore = null;
+        }
+
         [Test]
         public void Loading_GivenEmptyStore_ShouldReturnNull()
         {
             // Arrange
-            IDocumentStore documentStore = new EmbeddableDocumentStore { RunInMemory = true };
-            documentStore.Initialize();
-            IRepository<Customer> repository = new RavenRepository<Customer>(documentStore);
+            IRepository<Customer> repository = new RavenRepository<Customer>(_documentStore);
 
             // Act
             Customer customer = repository.Get("customer1");
@@ -31,9 +43,7 @@ namespace Regalo.EventSourcing.Raven.Tests.Unit
         {
             // Arrange
             Conventions.SetAggregatesMustImplementApplymethods(true);
-            IDocumentStore documentStore = new EmbeddableDocumentStore { RunInMemory = true };
-            documentStore.Initialize();
-            IRepository<Customer> repository = new RavenRepository<Customer>(documentStore);
+            IRepository<Customer> repository = new RavenRepository<Customer>(_documentStore);
 
             // Act
             var customer = new Customer();

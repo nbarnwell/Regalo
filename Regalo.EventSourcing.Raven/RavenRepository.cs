@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using Raven.Abstractions.Linq;
 using Raven.Client;
 using Regalo.Core;
 
