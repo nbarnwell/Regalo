@@ -1,1 +1,0 @@
-nuget.exe pack -outputdirectory c:\temp\Packages -symbols

@@ -72,7 +72,7 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PreBuildEvent>powershell.exe -command "$(ProjectDir)PreBuild.ps1" "$(ProjectDir)Properties\AssemblyInfo.Version.cs"</PreBuildEvent>
+    <PreBuildEvent>powershell.exe -command "$(ProjectDir)..\write-assemblyinfo.ps1" "$(ProjectDir)Properties\AssemblyInfo.Version.cs"</PreBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
