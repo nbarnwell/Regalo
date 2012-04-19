@@ -94,9 +94,9 @@
     <Reference Include="Raven.Storage.Managed">
       <HintPath>..\packages\RavenDB-Embedded.1.0.888\lib\net40\Raven.Storage.Managed.dll</HintPath>
     </Reference>
-    <Reference Include="Regalo.Core, Version=0.0.0.15, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="Regalo.Core, Version=0.0.0.16, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Regalo.Core.0.0.0.15\lib\net40-Client\Regalo.Core.dll</HintPath>
+      <HintPath>..\packages\Regalo.Core.0.0.0.16\lib\net40-Client\Regalo.Core.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.Composition" />
