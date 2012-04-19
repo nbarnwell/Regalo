@@ -2,6 +2,7 @@
 using NUnit.Framework;
 using Raven.Client;
 using Raven.Client.Document;
+using Raven.Client.Embedded;
 using Regalo.Core;
 
 namespace Regalo.EventSourcing.Raven.Tests.Unit
@@ -14,7 +15,7 @@ namespace Regalo.EventSourcing.Raven.Tests.Unit
         [SetUp]
         public void SetUp()
         {
-            _documentStore = new DocumentStore {Url = "http://localhost:8080", DefaultDatabase = "Regalo.Core.Test"};
+            _documentStore = new EmbeddableDocumentStore {RunInMemory = true};
             _documentStore.Initialize();
         }
 

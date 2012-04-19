@@ -7,7 +7,7 @@ namespace Regalo.Core
 {
     public abstract class AggregateRoot
     {
-        private IList<object> _uncommittedEvents = new List<object>(); 
+        private IList<object> _uncommittedEvents = new List<object>();
 
         public string Id { get; set; }
         
