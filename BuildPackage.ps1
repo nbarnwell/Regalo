@@ -1,3 +1,4 @@
-md c:\temp\Packages
-gci -filter *.mm.dll -recurse | %{ del $_.fullname }
-nuget.exe pack -outputdirectory c:\temp\Packages -symbols
+if (!(test-path c:\temp\Packages)) {
+   md c:\temp\Packages
+}
+nuget.exe pack -Build -Symbols -outputdirectory c:\temp\Packages -Properties Configuration=Release
