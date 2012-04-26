@@ -9,8 +9,13 @@ namespace Regalo.Core
     {
         private IList<object> _uncommittedEvents = new List<object>();
 
-        public string Id { get; set; }
-        
+        public Guid Id { get; private set; }
+
+        protected AggregateRoot(Guid id)
+        {
+            Id = id;
+        }
+
         protected void Record(object evt)
         {
             _uncommittedEvents.Add(evt);
