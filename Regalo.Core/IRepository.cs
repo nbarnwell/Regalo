@@ -1,9 +1,11 @@
-﻿namespace Regalo.Core
+﻿using System;
+
+namespace Regalo.Core
 {
     public interface IRepository<T>
         where T : AggregateRoot, new()
     {
-        T Get(string id);
+        T Get(Guid id);
         void Save(T item);
     }
 }

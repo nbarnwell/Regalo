@@ -9,7 +9,7 @@ namespace Regalo.EventSourcing.Raven
     {
         public string AggregateId { get; private set; }
 
-        [JsonProperty(TypeNameHandling = TypeNameHandling.All)]
+        //[JsonProperty(TypeNameHandling = TypeNameHandling.All)]
         public object Event { get; private set; }
 
         public EventContainer(object evt)

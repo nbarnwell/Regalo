@@ -24,7 +24,7 @@ namespace Regalo.Core
 
             if (applyMethod != null)
             {
-                applyMethod.Invoke(this, new object[] { evt });
+                applyMethod.Invoke(this, new[] { evt });
             }
         }
 
@@ -68,12 +68,12 @@ namespace Regalo.Core
 
                 if (Conventions.AggregatesMustImplementApplyMethods && applyMethod == null)
                 {
-                    throw new InvalidOperationException(string.Format("Class {0} does not implement Apply({1} evt)", this.GetType().Name, eventType.Name));
+                    throw new InvalidOperationException(string.Format("Class {0} does not implement Apply({1} evt)", GetType().Name, eventType.Name));
                 }
 
                 if (applyMethod != null)
                 {
-                    applyMethod.Invoke(this, new object[] { evt });
+                    applyMethod.Invoke(this, new[] { evt });
                 }
             }
         }

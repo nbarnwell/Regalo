@@ -1,5 +1,3 @@
-using System;
-
 namespace Regalo.Core
 {
     public abstract class Event : Message
