@@ -2,7 +2,7 @@
 using NUnit.Framework;
 using Regalo.Core;
 
-namespace Regalo.EventSourcing.SqlServer.Tests.Unit
+namespace Regalo.SqlServer.Tests.Unit
 {
     [TestFixture]
     public class PersistenceTests

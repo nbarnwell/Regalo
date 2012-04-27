@@ -5,7 +5,7 @@ using System.Data.SqlClient;
 using Newtonsoft.Json;
 using Regalo.Core;
 
-namespace Regalo.EventSourcing.SqlServer
+namespace Regalo.SqlServer
 {
     public class SqlServerRepository<TAggregateRoot> : IRepository<TAggregateRoot> where TAggregateRoot : AggregateRoot, new()
     {

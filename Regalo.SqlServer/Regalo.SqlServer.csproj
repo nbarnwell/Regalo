@@ -5,11 +5,11 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{06D4DBF6-4C96-4739-92C2-0AC59C6A5BC3}</ProjectGuid>
+    <ProjectGuid>{E291B026-2758-41AC-9658-5CDACEF8E413}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Regalo.EventSourcing.SqlServer.Tests.Unit</RootNamespace>
-    <AssemblyName>Regalo.EventSourcing.SqlServer.Tests.Unit</AssemblyName>
+    <RootNamespace>Regalo.SqlServer</RootNamespace>
+    <AssemblyName>Regalo.SqlServer</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -31,8 +31,8 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="nunit.framework">
-      <HintPath>..\packages\NUnit.2.6.0.12054\lib\nunit.framework.dll</HintPath>
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>..\packages\Newtonsoft.Json.4.0.8\lib\net40\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="Regalo.Core">
       <HintPath>..\packages\Regalo.Core.0.0.0.7\lib\net40-Client\Regalo.Core.dll</HintPath>
@@ -46,17 +46,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="PersistenceTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SqlServerRepository.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Regalo.EventSourcing.SqlServer\Regalo.EventSourcing.SqlServer.csproj">
-      <Project>{E291B026-2758-41AC-9658-5CDACEF8E413}</Project>
-      <Name>Regalo.EventSourcing.SqlServer</Name>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
