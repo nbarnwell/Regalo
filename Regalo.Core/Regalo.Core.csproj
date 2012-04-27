@@ -45,6 +45,7 @@
     <Compile Include="Command.cs" />
     <Compile Include="Conventions.cs" />
     <Compile Include="Event.cs" />
+    <Compile Include="EventSourcing\EventSourcingRepository.cs" />
     <Compile Include="EventSourcing\IEventStore.cs" />
     <Compile Include="EventSourcing\InMemoryEventStore.cs" />
     <Compile Include="ICommandHandler.cs" />

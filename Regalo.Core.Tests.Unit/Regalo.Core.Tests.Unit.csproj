@@ -48,7 +48,15 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AggregateTests.cs" />
+    <Compile Include="DomainModel\SalesOrders\ItemsAddedToOrder.cs" />
+    <Compile Include="DomainModel\SalesOrders\TransactionPlaced.cs" />
+    <Compile Include="DomainModel\Users\User.cs" />
+    <Compile Include="DomainModel\Users\UserChangedPassword.cs" />
+    <Compile Include="DomainModel\Users\UserRegistered.cs" />
+    <Compile Include="RepositoryTests.cs" />
+    <Compile Include="InMemoryEventStoreTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ToStringTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -59,6 +67,7 @@
       <Name>Regalo.Core</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

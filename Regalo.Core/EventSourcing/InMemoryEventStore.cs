@@ -10,7 +10,13 @@ namespace Regalo.Core.EventSourcing
 
         public IEnumerable<object> Load(Guid aggregateId)
         {
-            return FindAggregateEventList(aggregateId) ?? Enumerable.Empty<object>();
+            return FindAggregateEventList(aggregateId);
+        }
+
+        public IEnumerable<object> Load(Guid aggregateId, int minVersion, int maxVersion)
+        {
+            IList<object> events = FindAggregateEventList(aggregateId);
+            return events != null ? events.Skip(minVersion - 1).Take(maxVersion - minVersion + 1) : null;
         }
 
         public void Store(Guid aggregateId, object evt)
