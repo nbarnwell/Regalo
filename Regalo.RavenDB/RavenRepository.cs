@@ -3,7 +3,7 @@ using System.Linq;
 using Raven.Client;
 using Regalo.Core;
 
-namespace Regalo.EventSourcing.Raven
+namespace Regalo.RavenDB
 {
     public class RavenRepository<TAggregateRoot> : IRepository<TAggregateRoot> where TAggregateRoot : AggregateRoot, new()
     {

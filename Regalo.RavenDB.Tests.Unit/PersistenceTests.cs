@@ -1,43 +1,69 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Runtime.Serialization;
 using NUnit.Framework;
+using Raven.Client;
+using Raven.Client.Embedded;
 using Regalo.Core;
 
-namespace Regalo.EventSourcing.Tests.Unit
+namespace Regalo.RavenDB.Tests.Unit
 {
-    // ReSharper disable InconsistentNaming
     [TestFixture]
     public class PersistenceTests
     {
+        private IDocumentStore _documentStore;
+
         [SetUp]
         public void SetUp()
         {
+            _documentStore = new EmbeddableDocumentStore {RunInMemory = true};
+            _documentStore.Initialize();
         }
 
         [TearDown]
         public void TearDown()
         {
+            _documentStore.Dispose();
+            _documentStore = null;
         }
 
         [Test]
-        public void Save_GivenAggregateRoot_ShouldStoreEventsInEventStore()
+        public void Loading_GivenEmptyStore_ShouldReturnNull()
         {
             // Arrange
-            var customer = new Customer();
+            IRepository<Customer> repository = new RavenRepository<Customer>(_documentStore);
 
             // Act
-
+            Customer customer = repository.Get(Guid.NewGuid());
 
             // Assert
+            Assert.Null(customer);
+        }
 
+        [Test]
+        public void Saving_GivenNewAggregate_ShouldAllowReloading()
+        {
+            // Arrange
+            Conventions.SetAggregatesMustImplementApplymethods(true);
+            IRepository<Customer> repository = new RavenRepository<Customer>(_documentStore);
+
+            // Act
+            var customer = new Customer();
+            customer.Signup();
+            var id = customer.Id;
+            repository.Save(customer);
+            customer = repository.Get(id);
+
+            // Assert
+            Assert.NotNull(customer);
+            Assert.AreEqual(id, customer.Id);
         }
     }
 
-    // ReSharper restore InconsistentNaming
-
     public class Customer : AggregateRoot
     {
+        public Customer(Guid id) : base(id)
+        {
+        }
+
         public void Signup()
         {
             Record(new CustomerSignedUp(Guid.NewGuid().ToString()));

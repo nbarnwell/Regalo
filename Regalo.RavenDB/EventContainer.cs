@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Reflection;
-using Newtonsoft.Json;
-using Regalo.Core;
 
-namespace Regalo.EventSourcing.Raven
+namespace Regalo.RavenDB
 {
     public class EventContainer
     {

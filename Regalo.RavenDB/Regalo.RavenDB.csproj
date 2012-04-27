@@ -8,8 +8,8 @@
     <ProjectGuid>{50C78CDB-3754-4AA7-A349-895FB0AB095E}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Regalo.EventSourcing.Raven</RootNamespace>
-    <AssemblyName>Regalo.EventSourcing.Raven</AssemblyName>
+    <RootNamespace>Regalo.RavenDB</RootNamespace>
+    <AssemblyName>Regalo.RavenDB</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile>Client</TargetFrameworkProfile>
@@ -53,9 +53,8 @@
     <Reference Include="Raven.Client.MvcIntegration">
       <HintPath>..\packages\RavenDB-Client.1.0.888\lib\net40\Raven.Client.MvcIntegration.dll</HintPath>
     </Reference>
-    <Reference Include="Regalo.Core, Version=0.0.0.20, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Regalo.Core.0.0.0.20\lib\net40-Client\Regalo.Core.dll</HintPath>
+    <Reference Include="Regalo.Core">
+      <HintPath>..\packages\Regalo.Core.0.0.0.23\lib\net40-Client\Regalo.Core.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.Composition" />
@@ -69,9 +68,7 @@
     <Compile Include="RavenRepository.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="packages.config">
-      <SubType>Designer</SubType>
-    </None>
+    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

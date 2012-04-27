@@ -22,13 +22,17 @@ namespace Regalo.Core.Tests.Unit
         public void InvokingBehaviour_GivenSimpleAggregateRoot_ShouldRecordEvents()
         {
             // Arrange
-            var id = Guid.NewGuid();
-            var user = new User(id);
+            var user = new User();
+            user.Register();
 
             // Act
             user.ChangePassword("newpassword");
             IEnumerable<object> actual = user.GetUncommittedEvents();
-            IEnumerable<object> expected = new [] { new UserChangedPassword(user.Id, "newpassword") };
+            IEnumerable<object> expected = new object[]
+                                               {
+                                                   new UserRegistered(user.Id),
+                                                   new UserChangedPassword(user.Id, "newpassword")
+                                               };
             
             // Assert
             CollectionAssert.AreEqual(expected, actual);
@@ -38,12 +42,12 @@ namespace Regalo.Core.Tests.Unit
         public void AcceptingEvents_GivenAggregateWithUncommittedEvents_ShouldClearUncommittedEvents()
         {
             // Arrange
-            var id = Guid.NewGuid();
-            var user = new User(id);
+            var user = new User();
+            user.Register();
             user.ChangePassword("newpassword");
 
             // Act
-            IEnumerable<object> expectedBefore = new[] { new UserChangedPassword(user.Id, "newpassword") };
+            IEnumerable<object> expectedBefore = new object[] { new UserRegistered(user.Id), new UserChangedPassword(user.Id, "newpassword") };
             IEnumerable<object> expectedAfter = new object[0];
 
             IEnumerable<object> before = user.GetUncommittedEvents();
@@ -59,8 +63,8 @@ namespace Regalo.Core.Tests.Unit
         public void InvokingBehaviour_GivenAggregateWithInvariantLogic_ShouldFailIfInvariantIsNotSatisfied()
         {
             // Arrange
-            var id = Guid.NewGuid();
-            var user = new User(id);
+            var user = new User();
+            user.Register();
             user.ChangePassword("newpassword");
 
             // Act / Assert
@@ -71,9 +75,9 @@ namespace Regalo.Core.Tests.Unit
         public void ApplyingPreviouslyGeneratedEvents_GivenNewAggregateObject_ShouldBringAggregateBackToPreviousState()
         {
             // Arrange
-            var id = Guid.NewGuid();
-            var user = new User(id);
-            var events = new object[] { new UserChangedPassword(user.Id, "newpassword"), new UserChangedPassword(user.Id, "newerpassword") };
+            var user = new User();
+            user.Register();
+            var events = new object[] {new UserRegistered(user.Id), new UserChangedPassword(user.Id, "newpassword"), new UserChangedPassword(user.Id, "newerpassword") };
 
             // Act
             user.ApplyAll(events);
@@ -86,9 +90,9 @@ namespace Regalo.Core.Tests.Unit
         public void ApplyingPreviousEvents_GivenEventsThatWouldNotSatisfyCurrentInvariantLogic_ShouldNotFail()
         {
             // Arrange
-            var id = Guid.NewGuid();
-            var user = new User(id); 
-            var events = new object[] { new UserChangedPassword(user.Id, "newpassword"), new UserChangedPassword(user.Id, "newpassword") };
+            var user = new User();
+            var userId = Guid.NewGuid();
+            var events = new object[] {new UserRegistered(userId), new UserChangedPassword(userId, "newpassword"), new UserChangedPassword(userId, "newpassword") };
             
             // Act
             user.ApplyAll(events);
@@ -96,17 +100,77 @@ namespace Regalo.Core.Tests.Unit
             // Assert
             Assert.Throws<InvalidOperationException>(() => user.ChangePassword("newpassword"), "Expected exception stating the new password must be different the the previous one, indicating that previous events have replayed successfully.");
         }
+
+        [Test]
+        public void ToString_GivenEventWithSingleProperty_ShouldReturnStandardFormattedString()
+        {
+            // Arrange
+            var userId = Guid.NewGuid();
+            var evt = new UserChangedPassword(userId, "newpassword");
+            var expected = string.Format("UserChangedPassword event for aggregate {0} with NewPassword: \"{1}\"", userId, evt.NewPassword);
+
+            // Act
+            string asString = evt.ToString();
+
+            // Assert
+            Assert.AreEqual(expected, asString, "Event was not correctly formatted to string.");
+        }
+
+        [Test]
+        public void ToString_GivenEventWithMultipleProperties_ShouldReturnStandardFormattedString()
+        {
+            // Arrange
+            string orderId = Guid.NewGuid().ToString();
+            var evt = new ItemsAddedToOrder(orderId, "sku", 12);
+            var expected = string.Format("ItemsAddedToOrder event for aggregate {0} with Sku: \"{1}\", Quantity: {2}", orderId, evt.Sku, evt.Quantity);
+
+            // Act
+            string asString = evt.ToString();
+
+            // Assert
+            Assert.AreEqual(expected, asString, "Event was not correctly formatted to string.");
+        }
+
+        [Test]
+        public void ToString_GivenEventWithEnumerableProperty_ShouldReturnStandardFormattedString()
+        {
+            // Arrange
+            string accountId = Guid.NewGuid().ToString();
+            var evt = new TransactionPlaced(accountId, (decimal)123.12, new[] { "Groceries", "Petrol" });
+            var expected = string.Format("TransactionPlaced event for aggregate {0} with Amount: {1}, Categories: {2}", accountId, evt.Amount, "String[]");
+
+            // Act
+            string asString = evt.ToString();
+
+            // Assert
+            Assert.AreEqual(expected, asString, "Event was not correctly formatted to string.");   
+        }
+
+        [Test]
+        public void ToString_GivenEventWithNullProperty_ShouldReturnStandardFormattedString()
+        {
+            // Arrange
+            string orderId = Guid.NewGuid().ToString();
+            var evt = new ItemsAddedToOrder(orderId, null, 12);
+            var expected = string.Format("ItemsAddedToOrder event for aggregate {0} with Sku: {1}, Quantity: {2}", orderId, "<null>", evt.Quantity);
+
+            // Act
+            string asString = evt.ToString();
+
+            // Assert
+            Assert.AreEqual(expected, asString, "Event was not correctly formatted to string.");
+        }
     }
 
     // ReSharper restore InconsistentNaming
 
     public class TransactionPlaced : Event
     {
-        public Guid AggregateId { get; private set; }
+        public string AggregateId { get; private set; }
         public decimal Amount { get; private set; }
         public string[] Categories { get; private set; }
 
-        public TransactionPlaced(Guid accountId, decimal amount, string[] categories)
+        public TransactionPlaced(string accountId, decimal amount, string[] categories)
         {
             AggregateId = accountId;
             Amount = amount;
@@ -217,12 +281,53 @@ namespace Regalo.Core.Tests.Unit
         }
     }
 
+    public class UserRegistered : Event
+    {
+        public Guid AggregateId { get; private set; }
+
+        public UserRegistered(Guid id)
+        {
+            AggregateId = id;
+        }
+
+        public bool Equals(UserRegistered other)
+        {
+            if (ReferenceEquals(null, other)) return false;
+            if (ReferenceEquals(this, other)) return true;
+            return other.AggregateId.Equals(AggregateId);
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj)) return false;
+            if (ReferenceEquals(this, obj)) return true;
+            if (obj.GetType() != typeof(UserRegistered)) return false;
+            return Equals((UserRegistered)obj);
+        }
+
+        public override int GetHashCode()
+        {
+            return AggregateId.GetHashCode();
+        }
+
+        public static bool operator ==(UserRegistered left, UserRegistered right)
+        {
+            return Equals(left, right);
+        }
+
+        public static bool operator !=(UserRegistered left, UserRegistered right)
+        {
+            return !Equals(left, right);
+        }
+    }
+
     public class User : AggregateRoot
     {
         private string _password;
 
-        public User(Guid id) : base(id)
+        public void Register()
         {
+            Record(new UserRegistered(Guid.NewGuid()));
         }
 
         public void ChangePassword(string newpassword)
@@ -231,6 +336,11 @@ namespace Regalo.Core.Tests.Unit
             if (newpassword == _password) throw new InvalidOperationException("New password cannot be the same as the old password.");
          
             Record(new UserChangedPassword(Id, newpassword));
+        }
+
+        private void Apply(UserRegistered evt)
+        {
+            Id = evt.AggregateId;
         }
 
         private void Apply(UserChangedPassword evt)

@@ -8,8 +8,8 @@
     <ProjectGuid>{DB02B697-1579-431D-BC09-9D801B95E5AE}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Regalo.EventSourcing.Raven.Tests.Unit</RootNamespace>
-    <AssemblyName>Regalo.EventSourcing.Raven.Tests.Unit</AssemblyName>
+    <RootNamespace>Regalo.RavenDB.Tests.Unit</RootNamespace>
+    <AssemblyName>Regalo.RavenDB.Tests.Unit</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile>
@@ -94,9 +94,8 @@
     <Reference Include="Raven.Storage.Managed">
       <HintPath>..\packages\RavenDB-Embedded.1.0.888\lib\net40\Raven.Storage.Managed.dll</HintPath>
     </Reference>
-    <Reference Include="Regalo.Core, Version=0.0.0.20, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Regalo.Core.0.0.0.20\lib\net40-Client\Regalo.Core.dll</HintPath>
+    <Reference Include="Regalo.Core">
+      <HintPath>..\packages\Regalo.Core.0.0.0.23\lib\net40-Client\Regalo.Core.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.Composition" />
@@ -109,6 +108,12 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Regalo.RavenDB\Regalo.RavenDB.csproj">
+      <Project>{50C78CDB-3754-4AA7-A349-895FB0AB095E}</Project>
+      <Name>Regalo.RavenDB</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
