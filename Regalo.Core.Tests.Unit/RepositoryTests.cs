@@ -104,5 +104,8 @@ namespace Regalo.Core.Tests.Unit
             // Assert
             Assert.AreEqual(3, user.Version);
         }
+
+
+        //Need new test for variations of conventions
     }
 }
