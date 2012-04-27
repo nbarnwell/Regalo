@@ -8,19 +8,23 @@ namespace Regalo.Core
     public abstract class AggregateRoot
     {
         private IList<object> _uncommittedEvents = new List<object>();
+        private readonly IDictionary<string, MethodInfo> _methodIndex = new Dictionary<string, MethodInfo>();
 
         public Guid Id { get; protected set; }
-        
+        public int Version { get; private set; }
+
         protected void Record(object evt)
         {
             _uncommittedEvents.Add(evt);
-
+            
             var applyMethod = GetApplyMethod(evt);
 
             if (applyMethod != null)
             {
                 applyMethod.Invoke(this, new[] { evt });
             }
+
+            Version++;
         }
 
         public IEnumerable<object> GetUncommittedEvents()
@@ -47,18 +51,16 @@ namespace Regalo.Core
 
         public void ApplyAll(IEnumerable<object> events)
         {
-            var methodIndex = new Dictionary<string, MethodInfo>();
-
             foreach (var evt in events)
             {
                 var eventType = evt.GetType();
 
                 MethodInfo applyMethod;
-                if (methodIndex.Count == 0 || !methodIndex.TryGetValue(eventType.Name, out applyMethod))
+                if (_methodIndex.Count == 0 || !_methodIndex.TryGetValue(eventType.Name, out applyMethod))
                 {
                     // Find and cache the apply method, even if there isn't one (so we don't try looking again)
                     applyMethod = GetApplyMethod(evt);
-                    methodIndex.Add(eventType.Name, applyMethod);
+                    _methodIndex.Add(eventType.Name, applyMethod);
                 }
 
                 if (Conventions.AggregatesMustImplementApplyMethods && applyMethod == null)
@@ -70,6 +72,8 @@ namespace Regalo.Core
                 {
                     applyMethod.Invoke(this, new[] { evt });
                 }
+
+                Version++;
             }
         }
     }

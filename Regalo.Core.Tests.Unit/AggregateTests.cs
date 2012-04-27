@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using NUnit.Framework;
 using Regalo.Core.Tests.Unit.DomainModel.Users;
 
@@ -69,6 +70,19 @@ namespace Regalo.Core.Tests.Unit
 
             // Act / Assert
             Assert.Throws<InvalidOperationException>(() => user.ChangePassword("newpassword"), "Expected exception stating the new password must be different the the previous one.");
+        }
+
+        [Test]
+        public void ApplyingNoEvents_GivenNewAggregateObject_ShouldNotModifyState()
+        {
+            // Arrange
+            var user = new User();
+
+            // Act
+            user.ApplyAll(Enumerable.Empty<object>());
+
+            // Assert
+            Assert.AreEqual(0, user.Version);
         }
 
         [Test]
