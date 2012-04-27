@@ -17,7 +17,13 @@ namespace Regalo.RavenDB
 
         public void Store(Guid aggregateId, object evt)
         {
-            throw new NotImplementedException();
+            using (var session = _documentStore.OpenSession())
+            {
+                var aggregateIdAsString = aggregateId.ToString();
+                session.Store(new EventContainer(aggregateIdAsString, evt));
+
+                session.SaveChanges();
+            }
         }
 
         public void Store(Guid aggregateId, IEnumerable<object> events)
@@ -51,6 +57,8 @@ namespace Regalo.RavenDB
 
         public IEnumerable<object> Load(Guid aggregateId, int minVersion, int maxVersion)
         {
+            if (maxVersion < minVersion) throw new InvalidOperationException(string.Format("Cannot load events between min version {0} and max version {1}", minVersion, maxVersion));
+
             using (var session = _documentStore.OpenSession())
             {
                 var aggregateIdAsString = aggregateId.ToString();
