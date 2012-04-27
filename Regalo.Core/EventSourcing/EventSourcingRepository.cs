@@ -28,6 +28,9 @@ namespace Regalo.Core.EventSourcing
         public void Save(TAggregateRoot item)
         {
             IEnumerable<object> events = item.GetUncommittedEvents();
+
+            // Concurrency control/event conflict merging
+
             _eventStore.Store(item.Id, events);
         }
     }
