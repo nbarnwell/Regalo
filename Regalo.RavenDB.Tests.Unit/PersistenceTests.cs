@@ -60,6 +60,31 @@ namespace Regalo.RavenDB.Tests.Unit
         }
 
         [Test]
+        public void Saving_GivenEventWithGuidProperty_ShouldAllowReloadingToGuidType()
+        {
+            // Arrange
+            IEventStore store = new RavenEventStore(_documentStore);
+
+            var customer = new Customer();
+            customer.Signup();
+
+            var accountManager = new AccountManager();
+            var startDate = new DateTime(2012, 4, 28);
+            accountManager.Employ(startDate);
+
+            customer.AssignAccountManager(accountManager.Id, startDate);
+
+            store.Store(customer.Id, customer.GetUncommittedEvents());
+
+            // Act
+            var acctMgrAssignedEvent = (AssignedAccountManager)store.Load(customer.Id).LastOrDefault();
+
+            // Assert
+            Assert.NotNull(acctMgrAssignedEvent);
+            Assert.AreEqual(accountManager.Id, acctMgrAssignedEvent.AccountManagerId);
+        }
+
+        [Test]
         public void Saving_GivenEvents_ShouldAllowReloading()
         {
             // Arrange

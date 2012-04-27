@@ -103,9 +103,12 @@
     <Reference Include="Microsoft.CSharp" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DomainModel\Customers\AccountManager.cs" />
     <Compile Include="DomainModel\Customers\Customer.cs" />
     <Compile Include="DomainModel\Customers\CustomerSignedUp.cs" />
+    <Compile Include="DomainModel\Customers\Employed.cs" />
     <Compile Include="DomainModel\Customers\SubscribedToNewsletter.cs" />
+    <Compile Include="DomainModel\InvariantNotSatisfiedException.cs" />
     <Compile Include="PersistenceTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
