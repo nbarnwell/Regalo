@@ -1,9 +1,9 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Serialization;
 using NUnit.Framework;
+using Regalo.Core.EventSourcing;
 using Regalo.Core.Tests.Unit.DomainModel.Users;
 
 namespace Regalo.Core.Tests.Unit
@@ -84,43 +84,5 @@ namespace Regalo.Core.Tests.Unit
             CollectionAssert.AreEqual(uncommittedEvents, conflict.UncommittedEvents);
             Assert.AreEqual("Changes conflict with one or more committed events.", conflict.Message);
         }
-    }
-
-    public class ConcurrencyConflict
-    {
-        public IEnumerable BaseEvents { get; private set; }
-        public IEnumerable UnseenEvents { get; private set; }
-        public IEnumerable UncommittedEvents { get; private set; }
-        public string Message { get; private set; }
-
-        public ConcurrencyConflict(string message, IEnumerable baseEvents, IEnumerable unseenEvents, IEnumerable uncommittedEvents)
-        {
-            BaseEvents = baseEvents;
-            UnseenEvents = unseenEvents;
-            UncommittedEvents = uncommittedEvents;
-            Message = message;
-        }
-    }
-
-    public class StrictConcurrencyMonitor : IConcurrencyMonitor
-    {
-        public IEnumerable<ConcurrencyConflict> CheckForConflicts(IEnumerable<object> baseEvents, IEnumerable<object> unseenEvents, IEnumerable<object> uncommittedEvents)
-        {
-            if (baseEvents == null) throw new ArgumentNullException("baseEvents");
-            if (unseenEvents == null) throw new ArgumentNullException("unseenEvents");
-            if (uncommittedEvents == null) throw new ArgumentNullException("uncommittedEvents");
-
-            if (unseenEvents.Any() && uncommittedEvents.Any())
-            {
-                return new[] { new ConcurrencyConflict("Changes conflict with one or more committed events.", baseEvents, unseenEvents, uncommittedEvents) };
-            }
-
-            return Enumerable.Empty<ConcurrencyConflict>();
-        }
-    }
-
-    public interface IConcurrencyMonitor
-    {
-        IEnumerable<ConcurrencyConflict> CheckForConflicts(IEnumerable<object> baseEvents, IEnumerable<object> unseenEvents, IEnumerable<object> uncommittedEvents);
     }
 }
