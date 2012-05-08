@@ -48,6 +48,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AggregateTests.cs" />
+    <Compile Include="SimpleConcurrencyTests.cs" />
     <Compile Include="DomainModel\SalesOrders\ItemsAddedToOrder.cs" />
     <Compile Include="DomainModel\SalesOrders\TransactionPlaced.cs" />
     <Compile Include="DomainModel\Users\User.cs" />
