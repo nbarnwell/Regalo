@@ -16,7 +16,7 @@ namespace Regalo.SqlServer
             _connectionString = connectionString;
         }
 
-        public TAggregateRoot Get(string id)
+        public TAggregateRoot Get(Guid id)
         {
             using (var connection = new SqlConnection(_connectionString))
             {
@@ -28,7 +28,7 @@ namespace Regalo.SqlServer
                     command.CommandType = CommandType.Text;
                     SqlParameter idParameter = command.CreateParameter();
                     idParameter.ParameterName = "@aggregateId";
-                    idParameter.SqlDbType = SqlDbType.VarChar;
+                    idParameter.SqlDbType = SqlDbType.UniqueIdentifier;
                     idParameter.Value = id;
 
                     using (var reader = command.ExecuteReader(CommandBehavior.CloseConnection))

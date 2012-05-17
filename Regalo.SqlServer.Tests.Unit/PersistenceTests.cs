@@ -14,7 +14,7 @@ namespace Regalo.SqlServer.Tests.Unit
             IRepository<Customer> repository = new SqlServerRepository<Customer>("");
 
             // Act
-            Customer customer = repository.Get("customer1");
+            Customer customer = repository.Get(Guid.NewGuid());
 
             // Assert
             Assert.Null(customer);
@@ -28,7 +28,7 @@ namespace Regalo.SqlServer.Tests.Unit
 
             // Act
             var customer = new Customer();
-            string id = customer.Id;
+            Guid id = customer.Id;
             repository.Save(customer);
             customer = repository.Get(id);
 
@@ -41,7 +41,7 @@ namespace Regalo.SqlServer.Tests.Unit
         {
             public Customer()
             {
-                Record(new CustomerCreated(Guid.NewGuid().ToString()));
+                Record(new CustomerCreated(Guid.NewGuid()));
             }
 
             private void Apply(CustomerCreated evt)
@@ -52,10 +52,11 @@ namespace Regalo.SqlServer.Tests.Unit
 
         public class CustomerCreated : Event
         {
-            public CustomerCreated(string id)
-                : base(id)
-            {
+            public Guid AggregateId { get; private set; }
 
+            public CustomerCreated(Guid aggregateId)
+            {
+                AggregateId = aggregateId;
             }
         }
     }

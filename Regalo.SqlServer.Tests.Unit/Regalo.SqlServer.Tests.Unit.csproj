@@ -35,7 +35,7 @@
       <HintPath>..\packages\NUnit.2.6.0.12054\lib\nunit.framework.dll</HintPath>
     </Reference>
     <Reference Include="Regalo.Core">
-      <HintPath>..\packages\Regalo.Core.0.0.0.7\lib\net40-Client\Regalo.Core.dll</HintPath>
+      <HintPath>..\packages\Regalo.Core.0.0.0.35\lib\net40-Client\Regalo.Core.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
