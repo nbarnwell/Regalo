@@ -11,7 +11,8 @@ namespace Regalo.Core
         private readonly IDictionary<string, MethodInfo> _methodIndex = new Dictionary<string, MethodInfo>();
 
         public Guid Id { get; protected set; }
-        public int Version { get; private set; }
+        public int BaseVersion { get; private set; }
+        public int CurrentVersion { get; private set; }
 
         protected void Record(object evt)
         {
@@ -24,7 +25,7 @@ namespace Regalo.Core
                 applyMethod.Invoke(this, new[] { evt });
             }
 
-            Version++;
+            CurrentVersion++;
         }
 
         public IEnumerable<object> GetUncommittedEvents()
@@ -34,6 +35,7 @@ namespace Regalo.Core
 
         public void AcceptUncommittedEvents()
         {
+            BaseVersion = CurrentVersion;
             _uncommittedEvents = new List<object>();
         }
 
@@ -73,7 +75,8 @@ namespace Regalo.Core
                     applyMethod.Invoke(this, new[] { evt });
                 }
 
-                Version++;
+                BaseVersion++;
+                CurrentVersion++;
             }
         }
     }

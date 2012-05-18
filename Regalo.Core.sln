@@ -5,6 +5,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Regalo.Core", "Regalo.Core\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Regalo.Core.Tests.Unit", "Regalo.Core.Tests.Unit\Regalo.Core.Tests.Unit.csproj", "{09055902-1429-4A6F-B3A7-01C3C2715FF1}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Regalo.Core.Tests.DomainModel", "Regalo.Core.Tests.DomainModel\Regalo.Core.Tests.DomainModel.csproj", "{332AA28A-3912-4ED3-AE65-0D9F0C2AE90E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -19,6 +21,10 @@ Global
 		{09055902-1429-4A6F-B3A7-01C3C2715FF1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{09055902-1429-4A6F-B3A7-01C3C2715FF1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{09055902-1429-4A6F-B3A7-01C3C2715FF1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{332AA28A-3912-4ED3-AE65-0D9F0C2AE90E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{332AA28A-3912-4ED3-AE65-0D9F0C2AE90E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{332AA28A-3912-4ED3-AE65-0D9F0C2AE90E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{332AA28A-3912-4ED3-AE65-0D9F0C2AE90E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

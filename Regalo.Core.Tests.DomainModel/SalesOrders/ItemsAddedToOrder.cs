@@ -1,4 +1,4 @@
-namespace Regalo.Core.Tests.Unit.DomainModel.SalesOrders
+namespace Regalo.Core.Tests.DomainModel.SalesOrders
 {
     public class ItemsAddedToOrder : Event
     {

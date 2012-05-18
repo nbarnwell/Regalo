@@ -5,7 +5,7 @@ using System.Linq;
 using System.Runtime.Serialization;
 using NUnit.Framework;
 using Regalo.Core.EventSourcing;
-using Regalo.Core.Tests.Unit.DomainModel.Users;
+using Regalo.Core.Tests.DomainModel.Users;
 
 namespace Regalo.Core.Tests.Unit
 {
@@ -22,7 +22,7 @@ namespace Regalo.Core.Tests.Unit
             IEnumerable<object> events = store.Load(Guid.NewGuid());
 
             // Assert
-            Assert.IsNull(events);
+            CollectionAssert.IsEmpty(events);
         }
 
         [Test]
@@ -35,7 +35,7 @@ namespace Regalo.Core.Tests.Unit
             IEnumerable<object> events = store.Load(Guid.NewGuid(), 1, 3);
 
             // Assert
-            Assert.IsNull(events);
+            CollectionAssert.IsEmpty(events);
         }
 
         [Test]

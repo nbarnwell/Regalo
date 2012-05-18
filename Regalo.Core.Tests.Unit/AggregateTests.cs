@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using NUnit.Framework;
-using Regalo.Core.Tests.Unit.DomainModel.Users;
+using Regalo.Core.Tests.DomainModel.Users;
 
 namespace Regalo.Core.Tests.Unit
 {
@@ -82,7 +82,7 @@ namespace Regalo.Core.Tests.Unit
             user.ApplyAll(Enumerable.Empty<object>());
 
             // Assert
-            Assert.AreEqual(0, user.Version);
+            Assert.AreEqual(0, user.BaseVersion);
         }
 
         [Test]

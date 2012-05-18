@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.Serialization;
 using NUnit.Framework;
 using Regalo.Core.EventSourcing;
-using Regalo.Core.Tests.Unit.DomainModel.Users;
+using Regalo.Core.Tests.DomainModel.Users;
 
 namespace Regalo.Core.Tests.Unit
 {

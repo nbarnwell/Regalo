@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using Moq;
 using NUnit.Framework;
 using Regalo.Core.EventSourcing;
-using Regalo.Core.Tests.Unit.DomainModel.Users;
+using Regalo.Core.Tests.DomainModel.Users;
 
 namespace Regalo.Core.Tests.Unit
 {
@@ -14,7 +16,7 @@ namespace Regalo.Core.Tests.Unit
         {
             // Arrange
             var eventStore = new InMemoryEventStore();
-            IRepository<User> repository = new EventSourcingRepository<User>(eventStore);
+            IRepository<User> repository = new EventSourcingRepository<User>(eventStore, new Mock<IConcurrencyMonitor>().Object);
             var user = new User();
 
             var expectedEvents = Enumerable.Empty<object>();
@@ -31,7 +33,7 @@ namespace Regalo.Core.Tests.Unit
         {
             // Arrange
             var eventStore = new InMemoryEventStore();
-            IRepository<User> repository = new EventSourcingRepository<User>(eventStore);
+            IRepository<User> repository = new EventSourcingRepository<User>(eventStore, new Mock<IConcurrencyMonitor>().Object);
             var user = new User();
             user.Register();
 
@@ -56,7 +58,7 @@ namespace Regalo.Core.Tests.Unit
                                              new UserChangedPassword("newpassword"),
                                              new UserChangedPassword("newnewpassword")
                                          });
-            IRepository<User> repository = new EventSourcingRepository<User>(eventStore);
+            IRepository<User> repository = new EventSourcingRepository<User>(eventStore, new Mock<IConcurrencyMonitor>().Object);
 
             // Act
             User user = repository.Get(userId);
@@ -66,7 +68,7 @@ namespace Regalo.Core.Tests.Unit
         }
 
         [Test]
-        public void GivenNewAggregateRoot_WhenBehaviourIsInvokedAndEventsRaised_ThenAggregateVersionShouldIncrement()
+        public void GivenNewAggregateRoot_WhenBehaviourIsInvokedAndEventsRaised_ThenOnlyAggregateCurrentVersionShouldIncrement()
         {
             // Arrange
             var user = new User();
@@ -75,13 +77,15 @@ namespace Regalo.Core.Tests.Unit
             user.Register();
 
             // Assert
-            Assert.AreEqual(1, user.Version, "User version is not correct.");
+            Assert.AreEqual(1, user.CurrentVersion, "User's current version is not correct.");
+            Assert.AreEqual(0, user.BaseVersion, "User's base version is not correct.");
 
             // Act
             user.ChangePassword("newpassword");
 
             // Assert
-            Assert.AreEqual(2, user.Version, "User version is not correct.");
+            Assert.AreEqual(2, user.CurrentVersion, "User's current version is not correct.");
+            Assert.AreEqual(0, user.BaseVersion, "User's base version is not correct.");
         }
 
         [Test]
@@ -96,15 +100,107 @@ namespace Regalo.Core.Tests.Unit
                                              new UserChangedPassword("newpassword"),
                                              new UserChangedPassword("newnewpassword")
                                          });
-            IRepository<User> repository = new EventSourcingRepository<User>(eventStore);
+            IRepository<User> repository = new EventSourcingRepository<User>(eventStore, new Mock<IConcurrencyMonitor>().Object);
 
             // Act
             User user = repository.Get(userId);
 
             // Assert
-            Assert.AreEqual(3, user.Version);
+            Assert.AreEqual(3, user.BaseVersion);
         }
 
+        [Test]
+        public void GivenNewAggreateWithNoEvents_WhenSaving_ThenShouldNotBotherCheckingConcurrency()
+        {
+            // Arrange
+            var user = new User();
+            var concurrencyMonitor = new Mock<IConcurrencyMonitor>();
+            var repository = new EventSourcingRepository<User>(new InMemoryEventStore(), concurrencyMonitor.Object);
+
+            // Act
+            repository.Save(user);
+
+            // Assert
+            concurrencyMonitor.Verify(monitor => monitor.CheckForConflicts(It.IsAny<IEnumerable<object>>(), It.IsAny<IEnumerable<object>>(), It.IsAny<IEnumerable<object>>()), Times.Never());
+        }
+
+        [Test]
+        public void GivenNewAggreateWithNewEvents_WhenSaving_ThenShouldNotBotherCheckingConcurrency()
+        {
+            // Arrange
+            var user = new User();
+            user.Register();
+            var concurrencyMonitor = new Mock<IConcurrencyMonitor>();
+            var repository = new EventSourcingRepository<User>(new InMemoryEventStore(), concurrencyMonitor.Object);
+
+            // Act
+            repository.Save(user);
+
+            // Assert
+            concurrencyMonitor.Verify(monitor => monitor.CheckForConflicts(It.IsAny<IEnumerable<object>>(), It.IsAny<IEnumerable<object>>(), It.IsAny<IEnumerable<object>>()), Times.Never());
+        }
+
+        [Test]
+        public void GivenExistingAggregateWithUnseenChanges_WhenSaving_ThenShouldCheckConcurrencyWithCorrectEvents()
+        {
+            // Arrange
+            var userId = Guid.NewGuid();
+            var eventStore = new InMemoryEventStore();
+            eventStore.Store(userId, new UserRegistered(userId));
+
+            var concurrencyMonitor = new Mock<IConcurrencyMonitor>();
+            var repository = new EventSourcingRepository<User>(eventStore, concurrencyMonitor.Object);
+            var user = repository.Get(userId);
+
+            // Now another user changes the password before we get chance to save our changes:
+            eventStore.Store(userId, new UserChangedPassword("adifferentpassword"));
+
+            user.ChangePassword("newpassword");
+
+            // Act
+            repository.Save(user);
+
+            // Assert
+            concurrencyMonitor.Verify(monitor => 
+                monitor.CheckForConflicts(
+                It.Is<IEnumerable<object>>(baseEvents => (baseEvents.Single() as UserRegistered).AggregateId == userId), 
+                It.Is<IEnumerable<object>>(unseenEvents => (unseenEvents.Single() as UserChangedPassword).NewPassword == "adifferentpassword"), 
+                It.Is<IEnumerable<object>>(uncommittedEvents => (uncommittedEvents.Single() as UserChangedPassword).NewPassword == "newpassword")));
+        }
+
+        [Test]
+        public void GivenAggregateWithUncommittedEvents_WhenSaved_ThenBaseVersionShouldMatchCurrentVersion()
+        {
+            // Arrange
+            var userId = Guid.NewGuid();
+            var eventStore = new InMemoryEventStore();
+            eventStore.Store(userId, new UserRegistered(userId));
+
+            var repository = new EventSourcingRepository<User>(eventStore, new Mock<IConcurrencyMonitor>().Object);
+            var user = repository.Get(userId);
+            user.ChangePassword("newpassword");
+            
+            // Act
+            repository.Save(user);
+
+            // Assert
+            Assert.AreEqual(user.CurrentVersion, user.BaseVersion, "User's base version has not been updated to match current version on successful save.");
+        }
+
+        [Test]
+        public void GivenAggregateWithUncommittedEvents_WhenSaving_ThenUncommittedEventsShouldBeAccepted()
+        {
+            // Arrange
+            var user = new User();
+            user.Register();
+            var repository = new EventSourcingRepository<User>(new InMemoryEventStore(), new Mock<IConcurrencyMonitor>().Object);
+
+            // Act
+            repository.Save(user);
+
+            // Assert
+            CollectionAssert.IsEmpty(user.GetUncommittedEvents());
+        }
 
         //Need new test for variations of conventions
     }

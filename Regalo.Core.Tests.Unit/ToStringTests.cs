@@ -1,7 +1,7 @@
 ﻿using System;
 using NUnit.Framework;
-using Regalo.Core.Tests.Unit.DomainModel.SalesOrders;
-using Regalo.Core.Tests.Unit.DomainModel.Users;
+using Regalo.Core.Tests.DomainModel.SalesOrders;
+using Regalo.Core.Tests.DomainModel.Users;
 
 namespace Regalo.Core.Tests.Unit
 {

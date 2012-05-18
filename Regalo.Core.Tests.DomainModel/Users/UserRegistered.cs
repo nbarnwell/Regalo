@@ -1,6 +1,6 @@
 using System;
 
-namespace Regalo.Core.Tests.Unit.DomainModel.Users
+namespace Regalo.Core.Tests.DomainModel.Users
 {
     public class UserRegistered : Event
     {

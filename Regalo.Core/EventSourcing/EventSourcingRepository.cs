@@ -1,22 +1,25 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Regalo.Core.EventSourcing
 {
     public class EventSourcingRepository<TAggregateRoot> : IRepository<TAggregateRoot> where TAggregateRoot : AggregateRoot, new()
     {
         private readonly IEventStore _eventStore;
+        private readonly IConcurrencyMonitor _concurrencyMonitor;
 
-        public EventSourcingRepository(IEventStore eventStore)
+        public EventSourcingRepository(IEventStore eventStore, IConcurrencyMonitor concurrencyMonitor)
         {
             _eventStore = eventStore;
+            _concurrencyMonitor = concurrencyMonitor;
         }
 
         public TAggregateRoot Get(Guid id)
         {
-            IEnumerable<object> events = _eventStore.Load(id);
+            object[] events = _eventStore.Load(id).ToArray();
 
-            if (events == null) return null;
+            if (events.Length == 0) return null;
 
             var aggregateRoot = new TAggregateRoot();
 
@@ -27,11 +30,21 @@ namespace Regalo.Core.EventSourcing
 
         public void Save(TAggregateRoot item)
         {
-            IEnumerable<object> events = item.GetUncommittedEvents();
+            var uncommittedEvents = item.GetUncommittedEvents().ToArray();
 
-            // Concurrency control/event conflict merging
+            if (uncommittedEvents.Length == 0) return;
 
-            _eventStore.Store(item.Id, events);
+            object[] baseAndUnseenEvents = _eventStore.Load(item.Id).ToArray();
+
+            if (baseAndUnseenEvents.Length > 0)
+            {
+                object[] baseEvents = baseAndUnseenEvents.Take(item.BaseVersion).ToArray();
+                object[] unseenEvents = baseAndUnseenEvents.Skip(item.BaseVersion).ToArray();
+                _concurrencyMonitor.CheckForConflicts(baseEvents, unseenEvents, uncommittedEvents);
+            }
+
+            _eventStore.Store(item.Id, uncommittedEvents);
+            item.AcceptUncommittedEvents();
         }
     }
 }
