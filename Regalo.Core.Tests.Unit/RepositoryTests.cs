@@ -16,7 +16,7 @@ namespace Regalo.Core.Tests.Unit
         {
             // Arrange
             var eventStore = new InMemoryEventStore();
-            IRepository<User> repository = new EventSourcingRepository<User>(eventStore, new Mock<IConcurrencyMonitor>().Object);
+            var repository = new EventSourcingRepository<User>(eventStore, new Mock<IConcurrencyMonitor>().Object);
             var user = new User();
 
             var expectedEvents = Enumerable.Empty<object>();
@@ -58,7 +58,7 @@ namespace Regalo.Core.Tests.Unit
                                              new UserChangedPassword("newpassword"),
                                              new UserChangedPassword("newnewpassword")
                                          });
-            IRepository<User> repository = new EventSourcingRepository<User>(eventStore, new Mock<IConcurrencyMonitor>().Object);
+            var repository = new EventSourcingRepository<User>(eventStore, new Mock<IConcurrencyMonitor>().Object);
 
             // Act
             User user = repository.Get(userId);
@@ -100,7 +100,7 @@ namespace Regalo.Core.Tests.Unit
                                              new UserChangedPassword("newpassword"),
                                              new UserChangedPassword("newnewpassword")
                                          });
-            IRepository<User> repository = new EventSourcingRepository<User>(eventStore, new Mock<IConcurrencyMonitor>().Object);
+            var repository = new EventSourcingRepository<User>(eventStore, new Mock<IConcurrencyMonitor>().Object);
 
             // Act
             User user = repository.Get(userId);
