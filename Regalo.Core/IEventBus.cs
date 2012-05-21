@@ -11,8 +11,8 @@ namespace Regalo.Core
         void Publish<TEvent>(TEvent evt);
 
         [Obsolete("Use Publish<TEvent>(IEnumerable<TEvent>) instead.", true)]
-        void Send<TEvent>(IEnumerable<TEvent> evt);
+        void Send<TEvent>(IEnumerable<TEvent> events);
         
-        void Publish<TEvent>(IEnumerable<TEvent> evt);
+        void Publish<TEvent>(IEnumerable<TEvent> events);
     }
 }

@@ -7,10 +7,20 @@ namespace Regalo.Testing
     {
         public void Send<TEvent>(TEvent evt)
         {
+            Publish(evt);
+        }
+
+        public void Publish<TEvent>(TEvent evt)
+        {
             throw new System.NotImplementedException();
         }
 
         public void Send<TEvent>(IEnumerable<TEvent> evt)
+        {
+            Publish(evt);
+        }
+
+        public void Publish<TEvent>(IEnumerable<TEvent> evt)
         {
             throw new System.NotImplementedException();
         }
