@@ -1,10 +1,13 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using System.Collections.Generic;
 using Regalo.Core;
 
 namespace Regalo.Testing
 {
     public class FakeEventBus : IEventBus
     {
+        private readonly IList<object> _events = new List<object>(); 
+        
         public void Send<TEvent>(TEvent evt)
         {
             Publish(evt);
@@ -12,7 +15,7 @@ namespace Regalo.Testing
 
         public void Publish<TEvent>(TEvent evt)
         {
-            throw new System.NotImplementedException();
+            _events.Add(evt);
         }
 
         public void Send<TEvent>(IEnumerable<TEvent> evt)
@@ -20,9 +23,14 @@ namespace Regalo.Testing
             Publish(evt);
         }
 
-        public void Publish<TEvent>(IEnumerable<TEvent> evt)
+        public void Publish<TEvent>(IEnumerable<TEvent> events)
         {
-            throw new System.NotImplementedException();
+            foreach (var evt in events)
+            {
+                Publish(evt);
+            }
         }
+
+        public IEnumerable<object> Events { get { return _events; } }
     }
 }
