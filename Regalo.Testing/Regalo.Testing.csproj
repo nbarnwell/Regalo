@@ -32,7 +32,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Regalo.Core">
-      <HintPath>..\packages\Regalo.Core.1.0.0.3\lib\net40-Client\Regalo.Core.dll</HintPath>
+      <HintPath>..\packages\Regalo.Core.1.0.0.4\lib\net40-Client\Regalo.Core.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
