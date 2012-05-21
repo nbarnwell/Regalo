@@ -44,9 +44,9 @@
     <Reference Include="Raven.Client.Lightweight, Version=1.0.0.0, Culture=neutral, PublicKeyToken=37f41c7f99471593, processorArchitecture=MSIL">
       <HintPath>..\packages\RavenDB.Client.1.0.888\lib\net40\Raven.Client.Lightweight.dll</HintPath>
     </Reference>
-    <Reference Include="Regalo.Core, Version=1.0.0.4, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="Regalo.Core, Version=1.0.0.6, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Regalo.Core.1.0.0.4\lib\net40-Client\Regalo.Core.dll</HintPath>
+      <HintPath>..\packages\Regalo.Core.1.0.0.6\lib\net40-Client\Regalo.Core.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.Composition" />
