@@ -51,7 +51,7 @@ namespace Regalo.RavenDB
                               where container.AggregateId == aggregateIdAsString
                               select container.Event).ToList();
 
-                return events.Count > 0 ? events : null;
+                return events.Count > 0 ? events : Enumerable.Empty<object>();
             }
         }
 
@@ -67,7 +67,7 @@ namespace Regalo.RavenDB
                               where container.AggregateId == aggregateIdAsString
                               select container.Event).Skip(minVersion - 1).Take(maxVersion - minVersion + 1).ToList();
 
-                return events.Count > 0 ? events : null;
+                return events.Count > 0 ? events : Enumerable.Empty<object>();
             }
         }
     }

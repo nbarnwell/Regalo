@@ -39,7 +39,7 @@ namespace Regalo.RavenDB.Tests.Unit
             IEnumerable<object> events = store.Load(Guid.NewGuid());
 
             // Assert
-            Assert.Null(events);
+            CollectionAssert.IsEmpty(events);
         }
 
         [Test]
@@ -114,7 +114,7 @@ namespace Regalo.RavenDB.Tests.Unit
             var events = store.Load(id);
 
             // Assert
-            Assert.IsNull(events);
+            CollectionAssert.IsEmpty(events);
         }
 
         [Test]
