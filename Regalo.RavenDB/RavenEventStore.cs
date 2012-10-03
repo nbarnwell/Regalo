@@ -17,13 +17,7 @@ namespace Regalo.RavenDB
 
         public void Store(Guid aggregateId, object evt)
         {
-            using (var session = _documentStore.OpenSession())
-            {
-                var aggregateIdAsString = aggregateId.ToString();
-                session.Store(new EventContainer(aggregateIdAsString, evt));
-
-                session.SaveChanges();
-            }
+            Store(aggregateId, new[] { evt });
         }
 
         public void Store(Guid aggregateId, IEnumerable<object> events)
@@ -32,9 +26,17 @@ namespace Regalo.RavenDB
             {
                 var aggregateIdAsString = aggregateId.ToString();
 
-                foreach (var evt in events)
+                var stream = session.Load<EventStream>(aggregateIdAsString);
+
+                if (stream == null)
                 {
-                    session.Store(new EventContainer(aggregateIdAsString, evt));
+                    stream = new EventStream(aggregateIdAsString);
+                    stream.Append(events);
+                    session.Store(stream);
+                }
+                else
+                {
+                    stream.Append(events);
                 }
 
                 session.SaveChanges();
@@ -47,28 +49,24 @@ namespace Regalo.RavenDB
             {
                 var aggregateIdAsString = aggregateId.ToString();
 
-                var events = (from container in session.Query<EventContainer>()
-                              where container.AggregateId == aggregateIdAsString
-                              select container.Event).ToList();
+                var stream = session.Load<EventStream>(aggregateIdAsString);
 
-                return events.Count > 0 ? events : Enumerable.Empty<object>();
+                if (stream != null)
+                {
+                    var events = stream.Events;
+
+                    return events.Any() ? events : Enumerable.Empty<object>();
+                }
+
+                return Enumerable.Empty<object>();
             }
         }
 
         public IEnumerable<object> Load(Guid aggregateId, int minVersion, int maxVersion)
         {
-            if (maxVersion < minVersion) throw new InvalidOperationException(string.Format("Cannot load events between min version {0} and max version {1}", minVersion, maxVersion));
-
-            using (var session = _documentStore.OpenSession())
-            {
-                var aggregateIdAsString = aggregateId.ToString();
-
-                var events = (from container in session.Query<EventContainer>()
-                              where container.AggregateId == aggregateIdAsString
-                              select container.Event).Skip(minVersion - 1).Take(maxVersion - minVersion + 1).ToList();
-
-                return events.Count > 0 ? events : Enumerable.Empty<object>();
-            }
+            return Load(aggregateId)
+                .Skip(minVersion - 1)
+                .Take(maxVersion - (minVersion - 1));
         }
     }
 }
