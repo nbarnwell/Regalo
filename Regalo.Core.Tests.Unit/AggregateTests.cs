@@ -15,7 +15,7 @@ namespace Regalo.Core.Tests.Unit
             Resolver.SetResolver(
                 t =>
                 {
-                    if (t == typeof(IVersionHandler)) return new VersionHandler();
+                    if (t == typeof(IVersionHandler)) return new RuntimeConfiguredVersionHandler();
 
                     throw new NotSupportedException(string.Format("Nothing registered in SetUp for {0}", t));
                 });

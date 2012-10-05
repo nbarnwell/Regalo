@@ -70,7 +70,7 @@ namespace Regalo.Core
         private Guid FindCurrentVersion()
         {
             var versionHandler = Resolver.Resolve<IVersionHandler>();
-            var version = versionHandler.FindCurrentVersion(_uncommittedEvents);
+            var version = versionHandler.GetCurrentVersion(_uncommittedEvents);
             return version;
         }
 
