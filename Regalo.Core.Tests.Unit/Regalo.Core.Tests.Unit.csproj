@@ -57,6 +57,7 @@
     <Compile Include="InMemoryEventStoreTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ToStringTests.cs" />
+    <Compile Include="VersionHandlerTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

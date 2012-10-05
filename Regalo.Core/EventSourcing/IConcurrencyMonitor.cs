@@ -4,6 +4,6 @@ namespace Regalo.Core.EventSourcing
 {
     public interface IConcurrencyMonitor
     {
-        IEnumerable<ConcurrencyConflict> CheckForConflicts(IEnumerable<object> baseEvents, IEnumerable<object> unseenEvents, IEnumerable<object> uncommittedEvents);
+        IEnumerable<ConcurrencyConflict> CheckForConflicts(IEnumerable<object> unseenEvents, IEnumerable<object> uncommittedEvents);
     }
 }

@@ -38,13 +38,37 @@ namespace Regalo.Core.EventSourcing
 
             if (baseAndUnseenEvents.Length > 0)
             {
-                object[] baseEvents = baseAndUnseenEvents.Take(item.BaseVersion).ToArray();
-                object[] unseenEvents = baseAndUnseenEvents.Skip(item.BaseVersion).ToArray();
-                _concurrencyMonitor.CheckForConflicts(baseEvents, unseenEvents, uncommittedEvents);
+                var unseenEvents = GetUnseenEvents(item, baseAndUnseenEvents);
+                _concurrencyMonitor.CheckForConflicts(unseenEvents, uncommittedEvents);
             }
 
             _eventStore.Store(item.Id, uncommittedEvents);
             item.AcceptUncommittedEvents();
+        }
+
+        private static IEnumerable<object> GetUnseenEvents(TAggregateRoot item, IList<object> baseAndUnseenEvents)
+        {
+            var versionHandler = Resolver.Resolve<IVersionHandler>();
+            var unseenEvents = new Stack<object>();
+
+            // Reverse through the list, adding items to the "unseen" events list
+            // until we find the "base" event, put all previous events into the base
+            // events list in one go.
+            for (int i = baseAndUnseenEvents.Count - 1; i >= 0; i--)
+            {
+                var evt = baseAndUnseenEvents[i];
+
+                if (versionHandler.GetVersion(evt) != item.BaseVersion)
+                {
+                    unseenEvents.Push(evt);
+                }
+                else
+                {
+                    break;
+                }
+            }
+
+            return unseenEvents;
         }
     }
 }

@@ -7,26 +7,11 @@ namespace Regalo.Core
 {
     public abstract class AggregateRoot
     {
-        private IList<object> _uncommittedEvents = new List<object>();
         private readonly IDictionary<string, MethodInfo> _methodIndex = new Dictionary<string, MethodInfo>();
+        private readonly IList<object> _uncommittedEvents = new List<object>();
 
         public Guid Id { get; protected set; }
-        public int BaseVersion { get; private set; }
-        public int CurrentVersion { get; private set; }
-
-        protected void Record(object evt)
-        {
-            _uncommittedEvents.Add(evt);
-            
-            var applyMethod = GetApplyMethod(evt);
-
-            if (applyMethod != null)
-            {
-                applyMethod.Invoke(this, new[] { evt });
-            }
-
-            CurrentVersion++;
-        }
+        public Guid BaseVersion { get; private set; }
 
         public IEnumerable<object> GetUncommittedEvents()
         {
@@ -35,20 +20,10 @@ namespace Regalo.Core
 
         public void AcceptUncommittedEvents()
         {
-            BaseVersion = CurrentVersion;
-            _uncommittedEvents = new List<object>();
-        }
+            var version = FindCurrentVersion();
 
-        private MethodInfo GetApplyMethod(object evt)
-        {
-            var applyMethod = GetType().GetMethods(BindingFlags.Instance | BindingFlags.NonPublic)
-                .Where(m => m.Name == "Apply")
-                .Where(m =>
-                           {
-                               var parameters = m.GetParameters();
-                               return parameters.Length == 1 && parameters[0].ParameterType == evt.GetType();
-                           }).SingleOrDefault();
-            return applyMethod;
+            BaseVersion = version;
+            _uncommittedEvents.Clear();
         }
 
         public void ApplyAll(IEnumerable<object> events)
@@ -74,10 +49,41 @@ namespace Regalo.Core
                 {
                     applyMethod.Invoke(this, new[] { evt });
                 }
-
-                BaseVersion++;
-                CurrentVersion++;
             }
+
+            BaseVersion = FindCurrentVersion();
+        }
+
+        protected void Record(object evt)
+        {
+            var versionHandler = Resolver.Resolve<IVersionHandler>();
+            versionHandler.Append(_uncommittedEvents, evt);
+            
+            var applyMethod = GetApplyMethod(evt);
+
+            if (applyMethod != null)
+            {
+                applyMethod.Invoke(this, new[] { evt });
+            }
+        }
+
+        private Guid FindCurrentVersion()
+        {
+            var versionHandler = Resolver.Resolve<IVersionHandler>();
+            var version = versionHandler.FindCurrentVersion(_uncommittedEvents);
+            return version;
+        }
+
+        private MethodInfo GetApplyMethod(object evt)
+        {
+            var applyMethod = GetType().GetMethods(BindingFlags.Instance | BindingFlags.NonPublic)
+                .Where(m => m.Name == "Apply")
+                .Where(m =>
+                           {
+                               var parameters = m.GetParameters();
+                               return parameters.Length == 1 && parameters[0].ParameterType == evt.GetType();
+                           }).SingleOrDefault();
+            return applyMethod;
         }
     }
 }

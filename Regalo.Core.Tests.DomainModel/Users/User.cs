@@ -21,7 +21,7 @@ namespace Regalo.Core.Tests.DomainModel.Users
 
         private void Apply(UserRegistered evt)
         {
-            Id = evt.AggregateId;
+            Id = evt.UserId;
         }
 
         private void Apply(UserChangedPassword evt)

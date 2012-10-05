@@ -12,11 +12,19 @@ namespace Regalo.Core.Tests.Unit
         [SetUp]
         public void SetUp()
         {
+            Resolver.SetResolver(
+                t =>
+                {
+                    if (t == typeof(IVersionHandler)) return new VersionHandler();
+
+                    throw new NotSupportedException(string.Format("Nothing registered in SetUp for {0}", t));
+                });
         }
 
         [TearDown]
         public void TearDown()
         {
+            Resolver.ClearResolver();
         }
 
         [Test]

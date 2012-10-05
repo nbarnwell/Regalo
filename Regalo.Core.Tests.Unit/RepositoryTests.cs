@@ -68,7 +68,7 @@ namespace Regalo.Core.Tests.Unit
         }
 
         [Test]
-        public void GivenNewAggregateRoot_WhenBehaviourIsInvokedAndEventsRaised_ThenOnlyAggregateCurrentVersionShouldIncrement()
+        public void GivenAnyAggregateRoot_WhenBehaviourIsInvokedAndEventsRaised_ThenBaseVersionShouldNotChange()
         {
             // Arrange
             var user = new User();
@@ -77,14 +77,12 @@ namespace Regalo.Core.Tests.Unit
             user.Register();
 
             // Assert
-            Assert.AreEqual(1, user.CurrentVersion, "User's current version is not correct.");
             Assert.AreEqual(0, user.BaseVersion, "User's base version is not correct.");
 
             // Act
             user.ChangePassword("newpassword");
 
             // Assert
-            Assert.AreEqual(2, user.CurrentVersion, "User's current version is not correct.");
             Assert.AreEqual(0, user.BaseVersion, "User's base version is not correct.");
         }
 
@@ -94,12 +92,14 @@ namespace Regalo.Core.Tests.Unit
             // Arrange
             var eventStore = new InMemoryEventStore();
             var userId = Guid.NewGuid();
-            eventStore.Store(userId, new object[]
-                                         {
-                                             new UserRegistered(userId),
-                                             new UserChangedPassword("newpassword"),
-                                             new UserChangedPassword("newnewpassword")
-                                         });
+            eventStore.Store(
+                userId,
+                new object[]
+                {
+                    new UserRegistered(userId),
+                    new UserChangedPassword("newpassword"),
+                    new UserChangedPassword("newnewpassword")
+                });
             var repository = new EventSourcingRepository<User>(eventStore, new Mock<IConcurrencyMonitor>().Object);
 
             // Act
@@ -121,7 +121,7 @@ namespace Regalo.Core.Tests.Unit
             repository.Save(user);
 
             // Assert
-            concurrencyMonitor.Verify(monitor => monitor.CheckForConflicts(It.IsAny<IEnumerable<object>>(), It.IsAny<IEnumerable<object>>(), It.IsAny<IEnumerable<object>>()), Times.Never());
+            concurrencyMonitor.Verify(monitor => monitor.CheckForConflicts(It.IsAny<IEnumerable<object>>(), It.IsAny<IEnumerable<object>>()), Times.Never());
         }
 
         [Test]
@@ -137,7 +137,7 @@ namespace Regalo.Core.Tests.Unit
             repository.Save(user);
 
             // Assert
-            concurrencyMonitor.Verify(monitor => monitor.CheckForConflicts(It.IsAny<IEnumerable<object>>(), It.IsAny<IEnumerable<object>>(), It.IsAny<IEnumerable<object>>()), Times.Never());
+            concurrencyMonitor.Verify(monitor => monitor.CheckForConflicts(It.IsAny<IEnumerable<object>>(), It.IsAny<IEnumerable<object>>()), Times.Never());
         }
 
         [Test]
@@ -161,11 +161,13 @@ namespace Regalo.Core.Tests.Unit
             repository.Save(user);
 
             // Assert
-            concurrencyMonitor.Verify(monitor => 
+            concurrencyMonitor.Verify(
+                monitor =>
                 monitor.CheckForConflicts(
-                It.Is<IEnumerable<object>>(baseEvents => (baseEvents.Single() as UserRegistered).AggregateId == userId), 
-                It.Is<IEnumerable<object>>(unseenEvents => (unseenEvents.Single() as UserChangedPassword).NewPassword == "adifferentpassword"), 
-                It.Is<IEnumerable<object>>(uncommittedEvents => (uncommittedEvents.Single() as UserChangedPassword).NewPassword == "newpassword")));
+                    It.Is<IEnumerable<object>>(
+                        unseenEvents => (unseenEvents.Single() as UserChangedPassword).NewPassword == "adifferentpassword"),
+                    It.Is<IEnumerable<object>>(
+                        uncommittedEvents => (uncommittedEvents.Single() as UserChangedPassword).NewPassword == "newpassword")));
         }
 
         [Test]
@@ -174,17 +176,20 @@ namespace Regalo.Core.Tests.Unit
             // Arrange
             var userId = Guid.NewGuid();
             var eventStore = new InMemoryEventStore();
-            eventStore.Store(userId, new UserRegistered(userId));
+            var userRegistered = new UserRegistered(userId);
+            eventStore.Store(userId, userRegistered);
 
             var repository = new EventSourcingRepository<User>(eventStore, new Mock<IConcurrencyMonitor>().Object);
             var user = repository.Get(userId);
             user.ChangePassword("newpassword");
-            
+
+            var currentVersion = user.GetUncommittedEvents().Cast<Event>().Last().Version;
+
             // Act
             repository.Save(user);
 
             // Assert
-            Assert.AreEqual(user.CurrentVersion, user.BaseVersion, "User's base version has not been updated to match current version on successful save.");
+            Assert.AreEqual(currentVersion, user.BaseVersion, "User's base version has not been updated to match current version on successful save.");
         }
 
         [Test]
