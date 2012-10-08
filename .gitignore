@@ -53,3 +53,4 @@ lint.db
 PrecompiledWeb
 svnignore[.-]
 UpgradeLog*.*
+BuildOutput
