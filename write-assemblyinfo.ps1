@@ -1,26 +1,20 @@
-param($semverFilename, $assemblyInfoFilename)
+param($projectName, $assemblyInfoFilename)
 Set-StrictMode -Version Latest
 
-# Read revision from git
-$version = git describe --tags --long
-$matched = $version -match "^v(\d+)\.(\d+)\.(\d+)\-(\d+)-([A-Za-z0-9]{8})$"
-$revision = $Matches[4]
+$gitVersion = git describe --tags --long --match "$projectName-v*.*.*" --abbrev=40
+$gitVersion -match "^$projectName-v(\d+)\.(\d+)\.(\d+)\-(\d+)-(g[a-f0-9]{40})`$"
+($major, $minor, $build, $revision) = $Matches[1..4]
 
-# Read semver from file
-$content = $( get-content $semverFilename )
-$matched = $content -match "^v(\d+)\.(\d+)\.(\d+)$"
-($major, $minor, $build) = $Matches[1..3]
+$assemblyVersion = "$major.$minor.$build.$revision"
 
-# Write to file
-$version = "$major.$minor.$build.$revision"
-
-write-host "Building output as $version..."
+write-host "Building output as $assemblyVersion..."
 
 $assemblyInfo = @"
 using System.Reflection;
 
-[assembly: AssemblyVersion("$version")]
-[assembly: AssemblyFileVersion("$version")]
+[assembly: AssemblyDescription("A basic implementation of Greg Young's CQRS/ES pattern. Built from version $gitVersion.")]
+[assembly: AssemblyVersion("$assemblyVersion")]
+[assembly: AssemblyFileVersion("$assemblyVersion")]
 "@
 
 $assemblyInfo > $assemblyInfoFilename

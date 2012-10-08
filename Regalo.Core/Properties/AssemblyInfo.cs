@@ -6,7 +6,6 @@ using System.Runtime.InteropServices;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("Regalo.Core")]
-[assembly: AssemblyDescription("A basic implementation of Greg Young's CQRS/ES pattern.")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("Regalo")]
