@@ -60,7 +60,7 @@ namespace Regalo.Core.EventSourcing
 
         public IEnumerable<object> Events
         {
-            get { return _aggregates.Values.SelectMany(list => list); }
+            get { return _aggregates.Values.SelectMany(list => list).ToArray(); }
         }
     }
 }

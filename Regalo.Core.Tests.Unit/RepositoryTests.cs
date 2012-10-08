@@ -9,33 +9,8 @@ using Regalo.Core.Tests.DomainModel.Users;
 namespace Regalo.Core.Tests.Unit
 {
     [TestFixture]
-    public class RepositoryTests
+    public class RepositoryTests : TestFixtureBase
     {
-        [SetUp]
-        public void SetUp()
-        {
-            var versionHandler = new RuntimeConfiguredVersionHandler();
-            versionHandler.AddConfiguration<UserChangedPassword>(e => e.Version, (e, v) => e.Version = v);
-            versionHandler.AddConfiguration<UserRegistered>(e => e.Version, (e, v) => e.Version = v);
-
-            Resolver.SetResolver(
-                t =>
-                {
-                    if (t == typeof(IVersionHandler))
-                    {
-                        return versionHandler;
-                    }
-
-                    throw new NotSupportedException(string.Format("Nothing registered in SetUp for {0}", t));
-                });
-        }
-
-        [TearDown]
-        public void TearDown()
-        {
-            Resolver.ClearResolver();
-        }
-
         [Test]
         public void GivenAggregateWithNoUncommittedEvents_WhenSaved_ThenEventStoreShouldContainNoAdditionalEvents()
         {
@@ -50,7 +25,7 @@ namespace Regalo.Core.Tests.Unit
             repository.Save(user);
 
             // Assert
-            CollectionAssert.AreEqual(expectedEvents, eventStore.Events);
+            CollectionAssertAreJsonEqual(expectedEvents, eventStore.Events);
         }
 
         [Test]
@@ -68,7 +43,7 @@ namespace Regalo.Core.Tests.Unit
             repository.Save(user);
 
             // Assert
-            CollectionAssert.AreEqual(expectedEvents, eventStore.Events);
+            CollectionAssertAreJsonEqual(expectedEvents, eventStore.Events);
         }
 
         [Test]

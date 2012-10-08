@@ -60,6 +60,7 @@
     <Compile Include="RepositoryTests.cs" />
     <Compile Include="InMemoryEventStoreTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TestFixtureBase.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

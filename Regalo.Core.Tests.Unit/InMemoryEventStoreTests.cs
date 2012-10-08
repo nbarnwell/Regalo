@@ -10,7 +10,7 @@ using Regalo.Core.Tests.DomainModel.Users;
 namespace Regalo.Core.Tests.Unit
 {
     [TestFixture]
-    public class InMemoryEventStoreTests
+    public class InMemoryEventStoreTests : TestFixtureBase
     {
         [Test]
         public void GivenEmptyEventStore_WhenLoadingEvents_ThenNothingShouldBeReturned()

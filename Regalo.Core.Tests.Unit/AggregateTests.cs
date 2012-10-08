@@ -8,46 +8,8 @@ using Regalo.Core.Tests.DomainModel.Users;
 namespace Regalo.Core.Tests.Unit
 {
     [TestFixture]
-    public class AggregateTests
+    public class AggregateTests : TestFixtureBase
     {
-        private void CollectionAssertAreJsonEqual(IEnumerable<object> expected, IEnumerable<object> actual)
-        {
-            var expectedJson = expected.Select(x => JsonConvert.SerializeObject(x, Formatting.Indented));
-            var actualJson   = actual.Select(x => JsonConvert.SerializeObject(x, Formatting.Indented));
-
-            CollectionAssert.AreEqual(expectedJson, actualJson);
-        }
-
-        private void AssertAreJsonEqual(object expected, object actual)
-        {
-            var expectedJson = JsonConvert.SerializeObject(expected, Formatting.Indented);
-            var actualJson   = JsonConvert.SerializeObject(actual, Formatting.Indented);
-
-            Assert.AreEqual(expectedJson, actualJson);
-        }
-
-        [SetUp]
-        public void SetUp()
-        {
-            var versionHandler = new RuntimeConfiguredVersionHandler();
-            versionHandler.AddConfiguration<UserChangedPassword>(e => e.Version, (e, v) => e.Version = v);
-            versionHandler.AddConfiguration<UserRegistered>(e => e.Version, (e, v) => e.Version = v);
-
-            Resolver.SetResolver(
-                t =>
-                {
-                    if (t == typeof(IVersionHandler)) return versionHandler;
-
-                    throw new NotSupportedException(string.Format("Nothing registered in SetUp for {0}", t));
-                });
-        }
-
-        [TearDown]
-        public void TearDown()
-        {
-            Resolver.ClearResolver();
-        }
-
         [Test]
         public void InvokingBehaviour_GivenSimpleAggregateRoot_ShouldRecordEvents()
         {
