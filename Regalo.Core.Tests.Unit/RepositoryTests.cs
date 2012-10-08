@@ -11,6 +11,31 @@ namespace Regalo.Core.Tests.Unit
     [TestFixture]
     public class RepositoryTests
     {
+        [SetUp]
+        public void SetUp()
+        {
+            var versionHandler = new RuntimeConfiguredVersionHandler();
+            versionHandler.AddConfiguration<UserChangedPassword>(e => e.Version, (e, v) => e.Version = v);
+            versionHandler.AddConfiguration<UserRegistered>(e => e.Version, (e, v) => e.Version = v);
+
+            Resolver.SetResolver(
+                t =>
+                {
+                    if (t == typeof(IVersionHandler))
+                    {
+                        return versionHandler;
+                    }
+
+                    throw new NotSupportedException(string.Format("Nothing registered in SetUp for {0}", t));
+                });
+        }
+
+        [TearDown]
+        public void TearDown()
+        {
+            Resolver.ClearResolver();
+        }
+
         [Test]
         public void GivenAggregateWithNoUncommittedEvents_WhenSaved_ThenEventStoreShouldContainNoAdditionalEvents()
         {
@@ -52,46 +77,6 @@ namespace Regalo.Core.Tests.Unit
             // Arrange
             var eventStore = new InMemoryEventStore();
             var userId = Guid.NewGuid();
-            eventStore.Store(userId, new object[]
-                                         {
-                                             new UserRegistered(userId),
-                                             new UserChangedPassword("newpassword"),
-                                             new UserChangedPassword("newnewpassword")
-                                         });
-            var repository = new EventSourcingRepository<User>(eventStore, new Mock<IConcurrencyMonitor>().Object);
-
-            // Act
-            User user = repository.Get(userId);
-
-            // Assert
-            Assert.Throws<InvalidOperationException>(() => user.ChangePassword("newnewpassword")); // Should fail if the user's events were correctly applied
-        }
-
-        [Test]
-        public void GivenAnyAggregateRoot_WhenBehaviourIsInvokedAndEventsRaised_ThenBaseVersionShouldNotChange()
-        {
-            // Arrange
-            var user = new User();
-            
-            // Act
-            user.Register();
-
-            // Assert
-            Assert.AreEqual(0, user.BaseVersion, "User's base version is not correct.");
-
-            // Act
-            user.ChangePassword("newpassword");
-
-            // Assert
-            Assert.AreEqual(0, user.BaseVersion, "User's base version is not correct.");
-        }
-
-        [Test]
-        public void GivenPopulatedEventStore_WhenLoadingAggregate_ThenAggregateVersionShouldReflectStoredEvents()
-        {
-            // Arrange
-            var eventStore = new InMemoryEventStore();
-            var userId = Guid.NewGuid();
             eventStore.Store(
                 userId,
                 new object[]
@@ -106,7 +91,46 @@ namespace Regalo.Core.Tests.Unit
             User user = repository.Get(userId);
 
             // Assert
-            Assert.AreEqual(3, user.BaseVersion);
+            Assert.Throws<InvalidOperationException>(() => user.ChangePassword("newnewpassword")); // Should fail if the user's events were correctly applied
+        }
+
+        [Test]
+        public void GivenAnyAggregateRoot_WhenBehaviourIsInvokedAndEventsRaised_ThenBaseVersionShouldNotChange()
+        {
+            // Arrange
+            var user = new User();
+            user.Register();
+            var baseVersion = user.BaseVersion;
+
+            // Act
+            user.ChangePassword("newpassword");
+
+            // Assert
+            Assert.AreEqual(baseVersion, user.BaseVersion, "User's base version is not correct.");
+        }
+
+        [Test]
+        public void GivenPopulatedEventStore_WhenLoadingAggregate_ThenAggregateVersionShouldReflectStoredEvents()
+        {
+            // Arrange
+            var eventStore = new InMemoryEventStore();
+            var userId = Guid.NewGuid();
+            var latestVersion = Guid.NewGuid();
+            eventStore.Store(
+                userId,
+                new object[]
+                {
+                    new UserRegistered(userId),
+                    new UserChangedPassword("newpassword"),
+                    new UserChangedPassword("newnewpassword") { Version = latestVersion }
+                });
+            var repository = new EventSourcingRepository<User>(eventStore, new Mock<IConcurrencyMonitor>().Object);
+
+            // Act
+            User user = repository.Get(userId);
+
+            // Assert
+            Assert.AreEqual(latestVersion, user.BaseVersion);
         }
 
         [Test]

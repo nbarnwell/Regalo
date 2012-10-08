@@ -15,11 +15,13 @@ namespace Regalo.Core
 
         public IEnumerable<object> GetUncommittedEvents()
         {
-            return _uncommittedEvents;
+            return _uncommittedEvents.ToList();
         }
 
         public void AcceptUncommittedEvents()
         {
+            if (_uncommittedEvents.Any() == false) return;
+
             var version = FindCurrentVersion();
 
             BaseVersion = version;
@@ -28,6 +30,7 @@ namespace Regalo.Core
 
         public void ApplyAll(IEnumerable<object> events)
         {
+            object lastEvent = null;
             foreach (var evt in events)
             {
                 var eventType = evt.GetType();
@@ -49,9 +52,16 @@ namespace Regalo.Core
                 {
                     applyMethod.Invoke(this, new[] { evt });
                 }
+
+                lastEvent = evt;
             }
 
-            BaseVersion = FindCurrentVersion();
+            if (lastEvent != null)
+            {
+                var versionHandler = Resolver.Resolve<IVersionHandler>();
+                var currentVersion = versionHandler.GetVersion(lastEvent);
+                BaseVersion = currentVersion;
+            }
         }
 
         protected void Record(object evt)

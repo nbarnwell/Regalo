@@ -51,7 +51,6 @@
     <Compile Include="EventSourcing\IEventStore.cs" />
     <Compile Include="EventSourcing\InMemoryEventStore.cs" />
     <Compile Include="EventSourcing\StrictConcurrencyMonitor.cs" />
-    <Compile Include="EventVersionPersistenceConfiguration.cs" />
     <Compile Include="ICommandHandler.cs" />
     <Compile Include="ICommandBus.cs" />
     <Compile Include="ICommandProcessor.cs" />

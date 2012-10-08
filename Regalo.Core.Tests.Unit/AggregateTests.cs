@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using NUnit.Framework;
+using Newtonsoft.Json;
 using Regalo.Core.Tests.DomainModel.Users;
 
 namespace Regalo.Core.Tests.Unit
@@ -9,13 +10,33 @@ namespace Regalo.Core.Tests.Unit
     [TestFixture]
     public class AggregateTests
     {
+        private void CollectionAssertAreJsonEqual(IEnumerable<object> expected, IEnumerable<object> actual)
+        {
+            var expectedJson = expected.Select(x => JsonConvert.SerializeObject(x, Formatting.Indented));
+            var actualJson   = actual.Select(x => JsonConvert.SerializeObject(x, Formatting.Indented));
+
+            CollectionAssert.AreEqual(expectedJson, actualJson);
+        }
+
+        private void AssertAreJsonEqual(object expected, object actual)
+        {
+            var expectedJson = JsonConvert.SerializeObject(expected, Formatting.Indented);
+            var actualJson   = JsonConvert.SerializeObject(actual, Formatting.Indented);
+
+            Assert.AreEqual(expectedJson, actualJson);
+        }
+
         [SetUp]
         public void SetUp()
         {
+            var versionHandler = new RuntimeConfiguredVersionHandler();
+            versionHandler.AddConfiguration<UserChangedPassword>(e => e.Version, (e, v) => e.Version = v);
+            versionHandler.AddConfiguration<UserRegistered>(e => e.Version, (e, v) => e.Version = v);
+
             Resolver.SetResolver(
                 t =>
                 {
-                    if (t == typeof(IVersionHandler)) return new RuntimeConfiguredVersionHandler();
+                    if (t == typeof(IVersionHandler)) return versionHandler;
 
                     throw new NotSupportedException(string.Format("Nothing registered in SetUp for {0}", t));
                 });
@@ -44,7 +65,7 @@ namespace Regalo.Core.Tests.Unit
                                                };
             
             // Assert
-            CollectionAssert.AreEqual(expected, actual);
+            CollectionAssertAreJsonEqual(expected, actual);
         }
 
         [Test]
@@ -64,8 +85,8 @@ namespace Regalo.Core.Tests.Unit
             IEnumerable<object> after = user.GetUncommittedEvents();
             
             // Assert
-            CollectionAssert.AreEqual(expectedBefore, before);
-            CollectionAssert.AreEqual(expectedAfter, after);
+            CollectionAssertAreJsonEqual(expectedBefore, before);
+            CollectionAssertAreJsonEqual(expectedAfter, after);
         }
 
         [Test]
@@ -90,7 +111,7 @@ namespace Regalo.Core.Tests.Unit
             user.ApplyAll(Enumerable.Empty<object>());
 
             // Assert
-            Assert.AreEqual(0, user.BaseVersion);
+            AssertAreJsonEqual(Guid.Empty, user.BaseVersion);
         }
 
         [Test]

@@ -12,7 +12,7 @@ namespace Regalo.Core.Tests.Unit
         {
             // Arrange
             var versionHandler = new RuntimeConfiguredVersionHandler();
-            versionHandler.AddConfiguration(typeof(UserRegistered), e => ((UserRegistered)e).Version, null);
+            versionHandler.AddConfiguration<UserRegistered>(e => e.Version, null);
             var evt = new UserRegistered(Guid.NewGuid());
 
             // Act
@@ -27,7 +27,7 @@ namespace Regalo.Core.Tests.Unit
         {
             // Arrange
             var versionHandler = new RuntimeConfiguredVersionHandler();
-            versionHandler.AddConfiguration(typeof(UserRegistered), e => ((UserRegistered)e).Version, null);
+            versionHandler.AddConfiguration<UserRegistered>(e => e.Version, null);
             var userId = Guid.NewGuid();
             var lastVersion = Guid.NewGuid();
             var events = new[]

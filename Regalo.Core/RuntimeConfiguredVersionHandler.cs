@@ -6,20 +6,29 @@ namespace Regalo.Core
 {
     public class RuntimeConfiguredVersionHandler : IVersionHandler
     {
-        private readonly IDictionary<Type, Func<object, Guid>> _getVersionDelegateCache = new Dictionary<Type, Func<object, Guid>>();
-        private readonly IDictionary<Type, Action<object>> _setParentVersionDelegateCache = new Dictionary<Type, Action<object>>();
+        private readonly IDictionary<RuntimeTypeHandle, Func<object, Guid>> _versionSelectors = new Dictionary<RuntimeTypeHandle, Func<object, Guid>>();
+        private readonly IDictionary<RuntimeTypeHandle, Action<object, Guid>> _parentVersionSetters = new Dictionary<RuntimeTypeHandle, Action<object, Guid>>();
 
         public void Append(IList<object> events, object evt)
         {
-            var eventType = evt.GetType();
-
-            Action<object> setParentVersionHandler;
-            if (!_setParentVersionDelegateCache.TryGetValue(eventType, out setParentVersionHandler))
+            if (events.Any())
             {
-                throw new InvalidOperationException(string.Format("You have not configured a method for setting the Parent Version for events of type {0}", eventType));
+                var eventType = evt.GetType();
+
+                Action<object, Guid> setParentVersionHandler;
+                if (!_parentVersionSetters.TryGetValue(eventType.TypeHandle, out setParentVersionHandler))
+                {
+                    throw new InvalidOperationException(
+                        string.Format(
+                            "You have not configured a method for setting the Parent Version for events of type {0}",
+                            eventType));
+                }
+
+                var currentVersion = GetCurrentVersion(events);
+                setParentVersionHandler.Invoke(evt, currentVersion);
             }
 
-            setParentVersionHandler.Invoke(evt);
+            events.Add(evt);
         }
 
         public Guid GetCurrentVersion(IEnumerable<object> events)
@@ -36,7 +45,7 @@ namespace Regalo.Core
             var eventType = evt.GetType();
 
             Func<object, Guid> getVersionHandler;
-            if (!_getVersionDelegateCache.TryGetValue(eventType, out getVersionHandler))
+            if (!_versionSelectors.TryGetValue(eventType.TypeHandle, out getVersionHandler))
             {
                 throw new InvalidOperationException(string.Format("You have not configured a method for getting the Version for events of type {0}", eventType));
             }
@@ -44,10 +53,10 @@ namespace Regalo.Core
             return getVersionHandler.Invoke(evt);
         }
 
-        public void AddConfiguration(Type type, Func<object, Guid> getVersionHandler, Action<object> setParentVersionHandler)
+        public void AddConfiguration<TEvent>(Func<TEvent, Guid> versionSelector, Action<TEvent, Guid> parentVersionSetter)
         {
-            _getVersionDelegateCache.Add(type, getVersionHandler);
-            _setParentVersionDelegateCache.Add(type, setParentVersionHandler);
+            _versionSelectors.Add(typeof(TEvent).TypeHandle, x => versionSelector.Invoke((TEvent)x));
+            _parentVersionSetters.Add(typeof(TEvent).TypeHandle, (e, v) => parentVersionSetter.Invoke((TEvent)e, v));
         }
     }
 }
