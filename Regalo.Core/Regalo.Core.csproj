@@ -54,6 +54,7 @@
     <Compile Include="ICommandHandler.cs" />
     <Compile Include="ICommandBus.cs" />
     <Compile Include="ICommandProcessor.cs" />
+    <Compile Include="IdNotSetException.cs" />
     <Compile Include="IEventBus.cs" />
     <Compile Include="IEventHandler.cs" />
     <Compile Include="IRepository.cs" />

@@ -95,15 +95,33 @@ namespace Regalo.Core.Tests.Unit
         public void ApplyingPreviousEvents_GivenEventsThatWouldNotSatisfyCurrentInvariantLogic_ShouldNotFail()
         {
             // Arrange
+            var userId = Guid.Parse("{42B90234-926D-4AA6-A960-F610D52F8F88}");
             var user = new User();
-            var userId = Guid.NewGuid();
-            var events = new object[] {new UserRegistered(user.Id), new UserChangedPassword("newpassword"), new UserChangedPassword("newpassword") };
+            var events = new object[] {new UserRegistered(userId), new UserChangedPassword("newpassword"), new UserChangedPassword("newpassword") };
             
             // Act
             user.ApplyAll(events);
 
             // Assert
             Assert.Throws<InvalidOperationException>(() => user.ChangePassword("newpassword"), "Expected exception stating the new password must be different the the previous one, indicating that previous events have replayed successfully.");
+        }
+
+        [Test]
+        public void InvokingBehaviourThatDoesntSetId_GivenNewObject_ShouldFail()
+        {
+            var user = new User();
+
+            Assert.Throws<IdNotSetException>(() => user.ChangePassword("newpassword"));
+        }
+
+        [Test]
+        public void InvokingBehaviourOnObjectWithNoIdThatDoesntSetTheId_ShouldFail()
+        {
+            var user = new User();
+            var events = new object[] { /*new UserRegistered(user.Id), */new UserChangedPassword("newpassword"), new UserChangedPassword("newpassword") };
+            user.ApplyAll(events);
+
+            Assert.Throws<IdNotSetException>(() => user.ChangePassword("newnewpassword"));
         }
     }
 }
