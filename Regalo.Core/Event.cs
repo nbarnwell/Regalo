@@ -12,10 +12,5 @@ namespace Regalo.Core
         public Guid Version { get; set; }
 
         public Guid? ParentVersion { get; set; }
-
-        protected override string GetMessageTypeAsString()
-        {
-            return "event";
-        }
     }
 }
