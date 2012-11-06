@@ -6,6 +6,7 @@ namespace Regalo.Core
         where T : AggregateRoot, new()
     {
         T Get(Guid id);
+        T Get(Guid id, Guid version);
         void Save(T item);
     }
 }

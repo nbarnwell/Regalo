@@ -8,6 +8,6 @@ namespace Regalo.Core.EventSourcing
         void Store(Guid aggregateId, object evt);
         void Store(Guid aggregateId, IEnumerable<object> events);
         IEnumerable<object> Load(Guid aggregateId);
-        IEnumerable<object> Load(Guid aggregateId, int minVersion, int maxVersion);
+        IEnumerable<object> Load(Guid aggregateId, Guid maxVersion);
     }
 }
