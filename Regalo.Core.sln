@@ -1,11 +1,17 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 11.00
-# Visual Studio 2010
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Regalo.Core", "Regalo.Core\Regalo.Core.csproj", "{80473978-8D0F-4AD4-983E-600E516D49AB}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Regalo.Core.Tests.Unit", "Regalo.Core.Tests.Unit\Regalo.Core.Tests.Unit.csproj", "{09055902-1429-4A6F-B3A7-01C3C2715FF1}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Regalo.Core.Tests.DomainModel", "Regalo.Core.Tests.DomainModel\Regalo.Core.Tests.DomainModel.csproj", "{332AA28A-3912-4ED3-AE65-0D9F0C2AE90E}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{92CDD814-F327-4281-8ADD-389F9007A78C}"
+	ProjectSection(SolutionItems) = preProject
+		.nuget\NuGet.Config = .nuget\NuGet.Config
+		.nuget\NuGet.targets = .nuget\NuGet.targets
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
