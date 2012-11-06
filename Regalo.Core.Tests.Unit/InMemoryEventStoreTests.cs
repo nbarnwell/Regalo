@@ -32,7 +32,7 @@ namespace Regalo.Core.Tests.Unit
             IEventStore store = new InMemoryEventStore();
 
             // Act
-            IEnumerable<object> events = store.Load(Guid.NewGuid(), 1, 3);
+            IEnumerable<object> events = store.Load(Guid.NewGuid(), default(Guid));
 
             // Assert
             CollectionAssert.IsEmpty(events);
@@ -105,7 +105,7 @@ namespace Regalo.Core.Tests.Unit
             var id = Guid.NewGuid();
             var allEvents = new object[]
                                 {
-                                    new UserRegistered(id), // v1
+                                    new UserRegistered(id),          // v1
                                     new UserChangedPassword("pwd1"), // v2
                                     new UserChangedPassword("pwd2"), // v3
                                     new UserChangedPassword("pwd3"), // v4
@@ -114,7 +114,7 @@ namespace Regalo.Core.Tests.Unit
             store.Store(id, allEvents);
 
             // Act
-            IEnumerable<object> version3 = store.Load(id, 1, 3);
+            IEnumerable<object> version3 = store.Load(id, ((Event)allEvents[2]).Version);
 
             // Assert
             CollectionAssert.AreEqual(allEvents.Take(3), version3);

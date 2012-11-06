@@ -17,9 +17,24 @@ namespace Regalo.Core.EventSourcing
 
         public TAggregateRoot Get(Guid id)
         {
-            object[] events = _eventStore.Load(id).ToArray();
+            return Get(id, null);
+        }
 
-            if (events.Length == 0) return null;
+        public TAggregateRoot Get(Guid id, Guid version)
+        {
+            return Get(id, version);
+        }
+
+        private TAggregateRoot Get(Guid id, Guid? version)
+        {
+            var events = version == null
+                ? _eventStore.Load(id)
+                : _eventStore.Load(id, version.Value)
+                ;
+
+            events = events.ToList();
+
+            if (!events.Any()) return null;
 
             var aggregateRoot = new TAggregateRoot();
 
