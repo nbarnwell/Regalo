@@ -13,23 +13,26 @@ namespace Regalo.Core.EventSourcing
             return GetAggregateEventList(aggregateId);
         }
 
-        public IEnumerable<object> Load(Guid aggregateId, int minVersion, int maxVersion)
+        public IEnumerable<object> Load(Guid aggregateId, Guid maxVersion)
         {
+            var versionHandler = Resolver.Resolve<IVersionHandler>();
             IList<object> events = GetAggregateEventList(aggregateId);
-            return events.Skip(minVersion - 1).Take(maxVersion - minVersion + 1);
+            foreach (var evt in events)
+            {
+                yield return evt;
+                if (versionHandler.GetVersion(evt) == maxVersion) break;
+            }
         }
 
         public void Store(Guid aggregateId, object evt)
         {
             IList<object> aggregateEventList = GetAggregateEventList(aggregateId);
-
             aggregateEventList.Add(evt);
         }
 
         public void Store(Guid aggregateId, IEnumerable<object> events)
         {
             IList<object> aggregateEventList = GetAggregateEventList(aggregateId);
-
             foreach (var evt in events)
             {
                 aggregateEventList.Add(evt);
@@ -43,7 +46,6 @@ namespace Regalo.Core.EventSourcing
             {
                 return null;
             }
-
             return aggregateEventList;
         }
 
