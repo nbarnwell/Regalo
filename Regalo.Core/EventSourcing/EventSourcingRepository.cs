@@ -22,7 +22,7 @@ namespace Regalo.Core.EventSourcing
 
         public TAggregateRoot Get(Guid id, Guid version)
         {
-            return Get(id, version);
+            return Get(id, (Guid?)version);
         }
 
         private TAggregateRoot Get(Guid id, Guid? version)

@@ -70,6 +70,28 @@ namespace Regalo.Core.Tests.Unit
         }
 
         [Test]
+        public void GivenPopulatedEventStore_WhenLoadingSpecificVersionOfAggregate_ThenRepositoryShouldRebuildThatAggregateToThatVersion()
+        {
+            // Arrange
+            var eventStore = new InMemoryEventStore();
+            var userId = Guid.NewGuid();
+            var events = new object[]
+            {
+                new UserRegistered(userId), 
+                new UserChangedPassword("newpassword"), 
+                new UserChangedPassword("newnewpassword")
+            };
+            eventStore.Store(userId, events);
+            var repository = new EventSourcingRepository<User>(eventStore, new Mock<IConcurrencyMonitor>().Object);
+
+            // Act
+            User user = repository.Get(userId, ((Event)events[1]).Version);
+
+            // Assert
+            Assert.AreEqual(((Event)events[1]).Version, user.BaseVersion);
+        }
+
+        [Test]
         public void GivenAnyAggregateRoot_WhenBehaviourIsInvokedAndEventsRaised_ThenBaseVersionShouldNotChange()
         {
             // Arrange
