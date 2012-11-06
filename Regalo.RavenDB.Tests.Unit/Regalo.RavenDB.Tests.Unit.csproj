@@ -106,12 +106,15 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Regalo.Core\Regalo.Core.csproj">
+      <Project>{80473978-8D0F-4AD4-983E-600E516D49AB}</Project>
+      <Name>Regalo.Core</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Regalo.RavenDB\Regalo.RavenDB.csproj">
       <Project>{50C78CDB-3754-4AA7-A349-895FB0AB095E}</Project>
       <Name>Regalo.RavenDB</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\nuget.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

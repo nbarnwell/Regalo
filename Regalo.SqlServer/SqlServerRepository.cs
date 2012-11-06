@@ -52,6 +52,11 @@ namespace Regalo.SqlServer
             }
         }
 
+        public TAggregateRoot Get(Guid id, Guid version)
+        {
+            throw new NotImplementedException();
+        }
+
         public void Save(TAggregateRoot item)
         {
             throw new System.NotImplementedException();
