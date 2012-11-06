@@ -13,6 +13,8 @@
 *.gpState
 *.ilk
 *.ncb
+*.nuspec~
+*.nupkg
 *.obj
 *.opensdf
 *.patch

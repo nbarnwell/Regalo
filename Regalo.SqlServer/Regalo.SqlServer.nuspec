@@ -8,7 +8,7 @@
     <owners>Neil Barnwell</owners>
     <projectUrl>https://github.com/nbarnwell/Regalo</projectUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <description>A RavenDB event store implementation for Regalo.Core.</description>
+    <description>A Microsoft SQL Server event store implementation for Regalo.Core.</description>
     <releaseNotes></releaseNotes>
     <copyright>Copyright 2012</copyright>
     <tags>CQRS EventSourcing</tags>

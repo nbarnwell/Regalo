@@ -12,5 +12,8 @@
     <releaseNotes></releaseNotes>
     <copyright>Copyright 2012</copyright>
     <tags>CQRS EventSourcing</tags>
+    <dependencies>
+        <dependency id="Regalo.Core" version="$version$" />
+    </dependencies>
   </metadata>
 </package>

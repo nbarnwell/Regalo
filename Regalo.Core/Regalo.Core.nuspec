@@ -8,7 +8,7 @@
     <owners>Neil Barnwell</owners>
     <projectUrl>https://github.com/nbarnwell/Regalo</projectUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <description>A simple event sourcing "framework" based entirely on my learnings from Greg Young's DDD, CQRS and Event Sourcing course.</description>
+    <description>A simple DDD event sourcing library based entirely on my learnings from Greg Young's DDD, CQRS and Event Sourcing course.</description>
     <releaseNotes></releaseNotes>
     <copyright>Copyright 2012</copyright>
     <tags>CQRS EventSourcing</tags>
