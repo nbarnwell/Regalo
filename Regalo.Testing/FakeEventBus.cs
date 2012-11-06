@@ -6,9 +6,16 @@ namespace Regalo.Testing
 {
     public class FakeEventBus : IEventBus
     {
-        private readonly IList<object> _events = new List<object>(); 
-        
-        public void Send<TEvent>(TEvent evt)
+        private readonly IList<object> _events = new List<object>();
+
+        public IEnumerable<object> Events { get { return _events; } }
+
+        void IEventBus.Send<TEvent>(TEvent evt)
+        {
+            Publish(evt);
+        }
+
+        void IEventBus.Send<TEvent>(IEnumerable<TEvent> evt)
         {
             Publish(evt);
         }
@@ -18,11 +25,6 @@ namespace Regalo.Testing
             _events.Add(evt);
         }
 
-        public void Send<TEvent>(IEnumerable<TEvent> evt)
-        {
-            Publish(evt);
-        }
-
         public void Publish<TEvent>(IEnumerable<TEvent> events)
         {
             foreach (var evt in events)
@@ -30,7 +32,5 @@ namespace Regalo.Testing
                 Publish(evt);
             }
         }
-
-        public IEnumerable<object> Events { get { return _events; } }
     }
 }

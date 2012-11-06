@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Moq;
 using NUnit.Framework;
 using Raven.Client;
 using Raven.Client.Document;
@@ -39,7 +40,8 @@ namespace Regalo.RavenDB.Tests.Unit
         public void Loading_GivenEmptyStore_ShouldReturnNull()
         {
             // Arrange
-            IEventStore store = new RavenEventStore(_documentStore);
+            var versionHandlerMock = new Mock<IVersionHandler>();
+            IEventStore store = new RavenEventStore(_documentStore, versionHandlerMock.Object);
 
             // Act
             IEnumerable<object> events = store.Load(Guid.NewGuid());
@@ -52,7 +54,8 @@ namespace Regalo.RavenDB.Tests.Unit
         public void Saving_GivenSingleEvent_ShouldAllowReloading()
         {
             // Arrange
-            IEventStore store = new RavenEventStore(_documentStore);
+            var versionHandlerMock = new Mock<IVersionHandler>();
+            IEventStore store = new RavenEventStore(_documentStore, versionHandlerMock.Object);
 
             // Act
             var id = Guid.NewGuid();
@@ -72,7 +75,8 @@ namespace Regalo.RavenDB.Tests.Unit
         public void Saving_GivenEventWithGuidProperty_ShouldAllowReloadingToGuidType()
         {
             // Arrange
-            IEventStore store = new RavenEventStore(_documentStore);
+            var versionHandlerMock = new Mock<IVersionHandler>();
+            IEventStore store = new RavenEventStore(_documentStore, versionHandlerMock.Object);
 
             var customer = new Customer();
             customer.Signup();
@@ -97,7 +101,8 @@ namespace Regalo.RavenDB.Tests.Unit
         public void Saving_GivenEvents_ShouldAllowReloading()
         {
             // Arrange
-            IEventStore store = new RavenEventStore(_documentStore);
+            var versionHandlerMock = new Mock<IVersionHandler>();
+            IEventStore store = new RavenEventStore(_documentStore, versionHandlerMock.Object);
 
             // Act
             var customer = new Customer();
@@ -115,7 +120,8 @@ namespace Regalo.RavenDB.Tests.Unit
         public void Saving_GivenNoEvents_ShouldDoNothing()
         {
             // Arrange
-            IEventStore store = new RavenEventStore(_documentStore);
+            var versionHandlerMock = new Mock<IVersionHandler>();
+            IEventStore store = new RavenEventStore(_documentStore, versionHandlerMock.Object);
 
             // Act
             var id = Guid.NewGuid();
@@ -130,7 +136,10 @@ namespace Regalo.RavenDB.Tests.Unit
         public void GivenAggregateWithMultipleEvents_WhenLoadingSpecificVersion_ThenShouldOnlyReturnRequestedEvents()
         {
             // Arrange
-            IEventStore store = new RavenEventStore(_documentStore);
+            var versionHandlerMock = new Mock<IVersionHandler>();
+            versionHandlerMock.Setup(x => x.GetVersion(It.IsAny<Event>())).Returns<Event>(x => x.Version);
+
+            IEventStore store = new RavenEventStore(_documentStore, versionHandlerMock.Object);
             var customerId = Guid.NewGuid();
             var storedEvents = new object[]
                               {
@@ -141,10 +150,31 @@ namespace Regalo.RavenDB.Tests.Unit
             store.Store(customerId, storedEvents);
             
             // Act
-            var events = store.Load(customerId, 1, 2);
+            var events = store.Load(customerId, ((Event)storedEvents[1]).Version);
 
             // Assert
             CollectionAssert.AreEqual(storedEvents.Take(2), events, "Events loaded from store do not match version requested.");
+        }
+
+        [Test]
+        public void GivenAggregateWithMultipleEvents_WhenLoadingSpecificVersionThatNoEventHas_ThenShouldFail()
+        {
+            // Arrange
+            var versionHandlerMock = new Mock<IVersionHandler>();
+            versionHandlerMock.Setup(x => x.GetVersion(It.IsAny<Event>())).Returns<Event>(x => x.Version);
+
+            IEventStore store = new RavenEventStore(_documentStore, versionHandlerMock.Object);
+            var customerId = Guid.NewGuid();
+            var storedEvents = new object[]
+                              {
+                                  new CustomerSignedUp(customerId), 
+                                  new SubscribedToNewsletter("latest"), 
+                                  new SubscribedToNewsletter("top")
+                              };
+            store.Store(customerId, storedEvents);
+
+            // Act / Assert
+            Assert.Throws<ArgumentOutOfRangeException>(() => store.Load(customerId, Guid.Parse("00000000-0000-0000-0000-000000000001")));
         }
     }
 }
