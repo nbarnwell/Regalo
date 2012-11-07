@@ -8,7 +8,7 @@ namespace Regalo.Core.Tests.Unit
     public class RuntimeConfiguredVersionHandlerTests
     {
         [Test]
-        public void GivenAnyEvent_WhenQueryingVersion_ShouldReturnCorrectVersion()
+        public void GivenAnyEvent_WhenQueryingVersion_ThenShouldReturnCorrectVersion()
         {
             // Arrange
             var versionHandler = new RuntimeConfiguredVersionHandler();
@@ -23,28 +23,21 @@ namespace Regalo.Core.Tests.Unit
         }
 
         [Test]
-        public void GivenEventList_WhenQueryingCurrentVersion_ShouldReturnVersionOfLastEvent()
+        public void GivenNewEvent_WhenSettingParentVersion_ThenShouldSetParentVersion()
         {
             // Arrange
+            var userId = Guid.Parse("00000000-0000-0000-0000-000000000001");
+            var userRegisteredEvent = new UserRegistered(userId);
+            var userChangedPasswordEvent = new UserChangedPassword("newpassword");
+            
             var versionHandler = new RuntimeConfiguredVersionHandler();
-            versionHandler.AddConfiguration<UserRegistered>(e => e.Version, null);
-            var userId = Guid.NewGuid();
-            var lastVersion = Guid.NewGuid();
-            var events = new[]
-            {
-                new UserRegistered(userId) { Version = Guid.NewGuid() },
-                new UserRegistered(userId) { Version = Guid.NewGuid() },
-                new UserRegistered(userId) { Version = Guid.NewGuid() },
-                new UserRegistered(userId) { Version = Guid.NewGuid() },
-                new UserRegistered(userId) { Version = Guid.NewGuid() },
-                new UserRegistered(userId) { Version = lastVersion }
-            };
+            versionHandler.AddConfiguration<UserChangedPassword>(null, (e, v) => e.ParentVersion = v);
 
             // Act
-            Guid version = versionHandler.GetCurrentVersion(events);
+            versionHandler.SetParentVersion(userChangedPasswordEvent, userRegisteredEvent.Version);
 
             // Assert
-            Assert.AreEqual(lastVersion, version);
+            Assert.AreEqual(userRegisteredEvent.Version, userChangedPasswordEvent.ParentVersion);
         }
     }
 }

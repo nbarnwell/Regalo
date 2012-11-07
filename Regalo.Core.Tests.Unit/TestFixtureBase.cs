@@ -14,8 +14,8 @@ namespace Regalo.Core.Tests.Unit
         public void SetUp()
         {
             var versionHandler = new RuntimeConfiguredVersionHandler();
-            versionHandler.AddConfiguration<UserChangedPassword>(e => e.Version, (e, v) => e.Version = v);
-            versionHandler.AddConfiguration<UserRegistered>(e => e.Version, (e, v) => e.Version = v);
+            versionHandler.AddConfiguration<UserChangedPassword>(e => e.Version, (e, v) => e.ParentVersion = v);
+            versionHandler.AddConfiguration<UserRegistered>(e => e.Version, (e, v) => e.ParentVersion = v);
 
             Resolver.SetResolver(
                 t =>

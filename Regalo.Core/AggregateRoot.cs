@@ -12,7 +12,7 @@ namespace Regalo.Core
         private readonly IList<object> _uncommittedEvents = new List<object>();
 
         public Guid Id { get; protected set; }
-        public Guid BaseVersion { get; private set; }
+        public Guid? BaseVersion { get; private set; }
 
         public IEnumerable<object> GetUncommittedEvents()
         {
@@ -49,12 +49,19 @@ namespace Regalo.Core
 
         protected void Record(object evt)
         {
+            SetParentVersion(evt);
+
             ApplyEvent(evt);
 
             ValidateHasId();
+            
+            _uncommittedEvents.Add(evt);
+        }
 
+        private void SetParentVersion(object evt)
+        {
             var versionHandler = Resolver.Resolve<IVersionHandler>();
-            versionHandler.Append(_uncommittedEvents, evt);
+            versionHandler.SetParentVersion(evt, FindCurrentVersion());
         }
 
         private void ApplyEvent(object evt)
@@ -75,11 +82,17 @@ namespace Regalo.Core
             }
         }
 
-        private Guid FindCurrentVersion()
+        private Guid? FindCurrentVersion()
         {
-            var versionHandler = Resolver.Resolve<IVersionHandler>();
-            var version = versionHandler.GetCurrentVersion(_uncommittedEvents);
-            return version;
+            if (_uncommittedEvents.Any())
+            {
+                var versionHandler = Resolver.Resolve<IVersionHandler>();
+                return versionHandler.GetVersion(_uncommittedEvents.Last());
+            }
+            else
+            {
+                return BaseVersion;
+            }
         }
 
         private MethodInfo FindApplyMethod(object evt)
