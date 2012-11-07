@@ -60,10 +60,20 @@ namespace Regalo.Core.Tests.Unit
 
         private string FixVersionGuids(string json)
         {
-            return Regex.Replace(
-                json,
-                @"""Version""\s*:\s*""(?i:[a-f\d]{8}-[a-f\d]{4}-[a-f\d]{4}-[a-f\d]{4}-[a-f\d]{12})""",
-                @"""Version"" : ""00000000-0000-0000-0000-000000000000""");
+            var result = json;
+
+            result = Regex.Replace(
+                    result,
+                    @"""Version""\s*:\s*""(?i:[a-f\d]{8}-[a-f\d]{4}-[a-f\d]{4}-[a-f\d]{4}-[a-f\d]{12})""",
+                    @"""Version"" : ""00000000-0000-0000-0000-000000000000""");
+
+            result =
+                Regex.Replace(
+                    result,
+                    @"""ParentVersion""\s*:\s*""(?i:[a-f\d]{8}-[a-f\d]{4}-[a-f\d]{4}-[a-f\d]{4}-[a-f\d]{12})""",
+                    @"""ParentVersion"" : ""00000000-0000-0000-0000-000000000000""");
+
+            return result;
         }
     }
 }

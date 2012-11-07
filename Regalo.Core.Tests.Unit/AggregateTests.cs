@@ -20,11 +20,9 @@ namespace Regalo.Core.Tests.Unit
             // Act
             user.ChangePassword("newpassword");
             IEnumerable<object> actual = user.GetUncommittedEvents();
-            IEnumerable<object> expected = new object[]
-                                               {
-                                                   new UserRegistered(user.Id),
-                                                   new UserChangedPassword("newpassword")
-                                               };
+            var userRegisteredEvent = new UserRegistered(user.Id);
+            var userChangedPasswordEvent = new UserChangedPassword("newpassword") { ParentVersion = userRegisteredEvent.Version };
+            IEnumerable<object> expected = new object[] { userRegisteredEvent, userChangedPasswordEvent };
             
             // Assert
             CollectionAssertAreJsonEqual(expected, actual);
@@ -39,7 +37,9 @@ namespace Regalo.Core.Tests.Unit
             user.ChangePassword("newpassword");
 
             // Act
-            IEnumerable<object> expectedBefore = new object[] { new UserRegistered(user.Id), new UserChangedPassword("newpassword") };
+            var userRegisteredEvent = new UserRegistered(user.Id);
+            var userChangedPasswordEvent = new UserChangedPassword("newpassword") { ParentVersion = userRegisteredEvent.Version };
+            IEnumerable<object> expectedBefore = new object[] { userRegisteredEvent, userChangedPasswordEvent };
             IEnumerable<object> expectedAfter = new object[0];
 
             IEnumerable<object> before = user.GetUncommittedEvents();
@@ -73,7 +73,7 @@ namespace Regalo.Core.Tests.Unit
             user.ApplyAll(Enumerable.Empty<object>());
 
             // Assert
-            AssertAreJsonEqual(Guid.Empty, user.BaseVersion);
+            AssertAreJsonEqual((Guid?)null, user.BaseVersion);
         }
 
         [Test]

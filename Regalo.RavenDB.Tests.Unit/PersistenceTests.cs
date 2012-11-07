@@ -16,6 +16,7 @@ namespace Regalo.RavenDB.Tests.Unit
     public class PersistenceTests
     {
         private IDocumentStore _documentStore;
+        private Mock<IVersionHandler> _versionHandlerMock;
 
         [SetUp]
         public void SetUp()
@@ -27,11 +28,22 @@ namespace Regalo.RavenDB.Tests.Unit
             //    DefaultDatabase = "Regalo.RavenDB.Tests.UnitPersistenceTests"
             //};
             _documentStore.Initialize();
+
+            _versionHandlerMock = new Mock<IVersionHandler>();
+            _versionHandlerMock.Setup(x => x.GetVersion(It.IsAny<Event>())).Returns<Event>(x => x.Version);
+            _versionHandlerMock.Setup(x => x.SetParentVersion(It.IsAny<Event>(), It.IsAny<Guid?>())).Callback<object, Guid?>((x, v) => ((Event)x).ParentVersion = v);
+            Resolver.SetResolver(type =>
+            {
+                if (type == typeof(IVersionHandler)) return _versionHandlerMock.Object;
+                return null;
+            });
         }
 
         [TearDown]
         public void TearDown()
         {
+            Resolver.ClearResolver();
+
             _documentStore.Dispose();
             _documentStore = null;
         }
@@ -101,8 +113,7 @@ namespace Regalo.RavenDB.Tests.Unit
         public void Saving_GivenEvents_ShouldAllowReloading()
         {
             // Arrange
-            var versionHandlerMock = new Mock<IVersionHandler>();
-            IEventStore store = new RavenEventStore(_documentStore, versionHandlerMock.Object);
+            IEventStore store = new RavenEventStore(_documentStore, _versionHandlerMock.Object);
 
             // Act
             var customer = new Customer();
@@ -136,10 +147,7 @@ namespace Regalo.RavenDB.Tests.Unit
         public void GivenAggregateWithMultipleEvents_WhenLoadingSpecificVersion_ThenShouldOnlyReturnRequestedEvents()
         {
             // Arrange
-            var versionHandlerMock = new Mock<IVersionHandler>();
-            versionHandlerMock.Setup(x => x.GetVersion(It.IsAny<Event>())).Returns<Event>(x => x.Version);
-
-            IEventStore store = new RavenEventStore(_documentStore, versionHandlerMock.Object);
+            IEventStore store = new RavenEventStore(_documentStore, _versionHandlerMock.Object);
             var customerId = Guid.NewGuid();
             var storedEvents = new object[]
                               {
@@ -160,10 +168,7 @@ namespace Regalo.RavenDB.Tests.Unit
         public void GivenAggregateWithMultipleEvents_WhenLoadingSpecificVersionThatNoEventHas_ThenShouldFail()
         {
             // Arrange
-            var versionHandlerMock = new Mock<IVersionHandler>();
-            versionHandlerMock.Setup(x => x.GetVersion(It.IsAny<Event>())).Returns<Event>(x => x.Version);
-
-            IEventStore store = new RavenEventStore(_documentStore, versionHandlerMock.Object);
+            IEventStore store = new RavenEventStore(_documentStore, _versionHandlerMock.Object);
             var customerId = Guid.NewGuid();
             var storedEvents = new object[]
                               {
