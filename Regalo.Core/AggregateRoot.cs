@@ -8,7 +8,7 @@ namespace Regalo.Core
 {
     public abstract class AggregateRoot
     {
-        private readonly IDictionary<string, MethodInfo> _methodIndex = new Dictionary<string, MethodInfo>();
+        private readonly IDictionary<string, MethodInfo> _applyMethodCache = new Dictionary<string, MethodInfo>();
         private readonly IList<object> _uncommittedEvents = new List<object>();
 
         public Guid Id { get; protected set; }
@@ -54,7 +54,7 @@ namespace Regalo.Core
             ApplyEvent(evt);
 
             ValidateHasId();
-            
+
             _uncommittedEvents.Add(evt);
         }
 
@@ -66,9 +66,9 @@ namespace Regalo.Core
 
         private void ApplyEvent(object evt)
         {
-            var applyMethod = FindApplyMethod(evt);
+            var applyMethods = FindApplyMethods(evt);
 
-            if (applyMethod != null)
+            foreach (var applyMethod in applyMethods)
             {
                 applyMethod.Invoke(this, new[] { evt });
             }
@@ -95,11 +95,40 @@ namespace Regalo.Core
             }
         }
 
-        private MethodInfo FindApplyMethod(object evt)
+        /// <summary>
+        /// Returns the Apply methods for each type in the event type's inheritance
+        /// hierarchy, top-down, from interfaces before classes.
+        /// </summary>
+        private IEnumerable<MethodInfo> FindApplyMethods(object evt)
         {
-            Type eventType = evt.GetType();
+            var results = new List<MethodInfo>();
+
+            var eventBaseTypeStack = new Stack<Type>();
+            var eventType = evt.GetType();
+            eventBaseTypeStack.Push(eventType);
+            while (eventType.BaseType != null)
+            {
+                eventType = eventType.BaseType;
+                eventBaseTypeStack.Push(eventType);
+            }
+
+            foreach (var type in eventBaseTypeStack)
+            {
+                foreach (var eventInterface in type.GetInterfaces())
+                {
+                    results.Add(FindApplyMethod(eventInterface));
+                }
+
+                results.Add(FindApplyMethod(type));
+            }
+
+            return results.Where(x => x != null);
+        }
+
+        private MethodInfo FindApplyMethod(Type eventType)
+        {
             MethodInfo applyMethod;
-            if (_methodIndex.Count == 0 || !_methodIndex.TryGetValue(eventType.Name, out applyMethod))
+            if (_applyMethodCache.Count == 0 || !_applyMethodCache.TryGetValue(eventType.Name, out applyMethod))
             {
                 applyMethod = GetType().GetMethods(BindingFlags.Instance | BindingFlags.NonPublic)
                     .Where(m => m.Name == "Apply")
@@ -107,10 +136,10 @@ namespace Regalo.Core
                         m =>
                         {
                             var parameters = m.GetParameters();
-                            return parameters.Length == 1 && parameters[0].ParameterType == evt.GetType();
+                            return parameters.Length == 1 && parameters[0].ParameterType == eventType;
                         }).SingleOrDefault();
 
-                _methodIndex.Add(eventType.Name, applyMethod);
+                _applyMethodCache.Add(eventType.Name, applyMethod);
             }
 
             if (Conventions.AggregatesMustImplementApplyMethods && applyMethod == null)
@@ -121,7 +150,7 @@ namespace Regalo.Core
                         GetType().Name,
                         eventType.Name));
             }
-           
+
             return applyMethod;
         }
     }

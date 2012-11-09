@@ -75,6 +75,20 @@ namespace Regalo.Core.Tests.Unit
             // Assert
             AssertAreJsonEqual((Guid?)null, user.BaseVersion);
         }
+        
+        [Test]
+        public void ApplyingEventsThatHaveBaseType_GivenAnyAggregateObject_ShouldCallAppropriateApplyMethodForEachTypeInEventTypeHierarchy()
+        {
+            // Arrange
+            var user = new User();
+            var events = new object[] { new UserRegistered(user.Id), new UserChangedPassword("newpassword"), new UserChangedPassword("newerpassword") };
+
+            // Act
+            user.ApplyAll(events);
+
+            // Assert
+            Assert.AreEqual(3, user.ChangeCount);
+        }
 
         [Test]
         public void ApplyingPreviouslyGeneratedEvents_GivenNewAggregateObject_ShouldBringAggregateBackToPreviousState()

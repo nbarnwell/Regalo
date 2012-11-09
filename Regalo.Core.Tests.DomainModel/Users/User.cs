@@ -6,6 +6,11 @@ namespace Regalo.Core.Tests.DomainModel.Users
     {
         private string _password;
 
+        /// <summary>
+        /// Created to support a very specific test. Typical domain objects would *never* have public getters or setters!
+        /// </summary>
+        public int ChangeCount { get; private set; }
+
         public void Register()
         {
             Record(new UserRegistered(Guid.NewGuid()));
@@ -17,6 +22,11 @@ namespace Regalo.Core.Tests.DomainModel.Users
             if (newpassword == _password) throw new InvalidOperationException("New password cannot be the same as the old password.");
          
             Record(new UserChangedPassword(newpassword));
+        }
+
+        private void Apply(object evt)
+        {
+            ChangeCount++;
         }
 
         private void Apply(UserRegistered evt)
