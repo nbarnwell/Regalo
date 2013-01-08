@@ -66,6 +66,9 @@
     <Compile Include="Resolver.cs" />
     <Compile Include="TypeInspector.cs" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Regalo.Core.nuspec" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PreBuildEvent>powershell.exe -noprofile -noninteractive -command ". '$(ProjectDir)..\write-assemblyinfo.ps1' '$(ProjectName)' '$(ProjectDir)Properties\AssemblyInfo.Version.cs'"</PreBuildEvent>

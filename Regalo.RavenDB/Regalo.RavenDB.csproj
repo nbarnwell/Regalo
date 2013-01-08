@@ -62,6 +62,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+    <None Include="Regalo.RavenDB.nuspec" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Regalo.Core\Regalo.Core.csproj">

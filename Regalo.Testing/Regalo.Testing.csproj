@@ -52,6 +52,9 @@
       <Name>Regalo.Core</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Regalo.Testing.nuspec" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PreBuildEvent>powershell.exe -noninteractive -noprofile -command ". '$(ProjectDir)..\write-assemblyinfo.ps1' '$(ProjectName)' '$(ProjectDir)Properties\AssemblyInfo.Version.cs'"</PreBuildEvent>
