@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Data;
 using System.Linq;
 using System.Reflection;
 
@@ -101,28 +100,14 @@ namespace Regalo.Core
         /// </summary>
         private IEnumerable<MethodInfo> FindApplyMethods(object evt)
         {
-            var results = new List<MethodInfo>();
+            var typeInspector = new TypeInspector();
 
-            var eventBaseTypeStack = new Stack<Type>();
-            var eventType = evt.GetType();
-            eventBaseTypeStack.Push(eventType);
-            while (eventType.BaseType != null)
-            {
-                eventType = eventType.BaseType;
-                eventBaseTypeStack.Push(eventType);
-            }
+            var applyMethods = typeInspector.GetTypeHierarchy(evt.GetType())
+                                            .Select(FindApplyMethod)
+                                            .Where(x => x != null)
+                                            .ToList();
 
-            foreach (var type in eventBaseTypeStack)
-            {
-                foreach (var eventInterface in type.GetInterfaces())
-                {
-                    results.Add(FindApplyMethod(eventInterface));
-                }
-
-                results.Add(FindApplyMethod(type));
-            }
-
-            return results.Where(x => x != null);
+            return applyMethods;
         }
 
         private MethodInfo FindApplyMethod(Type eventType)

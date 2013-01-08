@@ -8,6 +8,7 @@ namespace Regalo.SqlServer.Tests.Unit
     public class PersistenceTests
     {
         [Test]
+        [Ignore]
         public void Loading_GivenEmptyStore_ShouldReturnNull()
         {
             // Arrange
