@@ -9,28 +9,28 @@ namespace Regalo.Core.Tests.Unit
     public class CommandProcessorTests
     {
         private ObjectCommandHandler _objectCommandHandler;
+        private CommandHandlerA _commandHandlerA;
+        private CommandHandlerB _commandHandlerB;
             
         [SetUp]
         public void SetUp()
         {
             _objectCommandHandler = new ObjectCommandHandler();
-            Resolver.SetResolver(LocateCommandHandler);
+            _commandHandlerA = new CommandHandlerA();
+            _commandHandlerB = new CommandHandlerB();
+            Resolver.SetResolvers(type => null, LocateAllCommandHandlers);
         }
 
-        private object LocateCommandHandler(Type type)
+        private IEnumerable<object> LocateAllCommandHandlers(Type type)
         {
-            if (type.IsAssignableFrom(_objectCommandHandler.GetType()))
-            {
-                return _objectCommandHandler;
-            }
-
-            throw new NotSupportedException(string.Format("No handler for type {0} registered.", type));
+            return new object[] { _objectCommandHandler, _commandHandlerA, _commandHandlerB }
+                .Where(x => type.IsAssignableFrom(x.GetType()));
         }
 
         [TearDown]
         public void TearDown()
         {
-            Resolver.ClearResolver();
+            Resolver.ClearResolvers();
         }
 
         [Test]
@@ -44,12 +44,14 @@ namespace Regalo.Core.Tests.Unit
             };
 
             var result = new List<Type>();
-            Resolver.ClearResolver();
-            Resolver.SetResolver(type =>
-            {
-                result.Add(type);
-                return LocateCommandHandler(type);
-            });
+            Resolver.ClearResolvers();
+            Resolver.SetResolvers(
+                type => null,
+                type =>
+                {
+                    result.Add(type);
+                    return LocateAllCommandHandlers(type);
+                });
 
             var processor = new CommandProcessor();
 
@@ -75,6 +77,42 @@ namespace Regalo.Core.Tests.Unit
             _objectCommandHandler.Messages.ToList().ForEach(Console.WriteLine);
 
             CollectionAssert.AreEqual(expected, _objectCommandHandler.Messages);
+        }
+
+        [Test]
+        public void GivenAMessageHandledMultipleHandlers_WhenAskedToProcess_ShouldInvokeAllCommandHandlersInCorrectSequence()
+        {
+            var processor = new CommandProcessor();
+
+            processor.Process(new CommandHandledByMultipleHandlers());
+
+            CollectionAssert.AreEqual(new [] { typeof(object) }, _objectCommandHandler.Messages);
+            CollectionAssert.AreEqual(new [] { typeof(CommandHandledByMultipleHandlers) }, _commandHandlerA.Messages);
+            CollectionAssert.AreEqual(new [] { typeof(CommandHandledByMultipleHandlers) }, _commandHandlerB.Messages);
+        }
+    }
+
+    public class CommandHandledByMultipleHandlers
+    {
+    }
+
+    public class CommandHandlerA : ICommandHandler<CommandHandledByMultipleHandlers>
+    {
+        public readonly IList<Type> Messages = new List<Type>();
+
+        public void Handle(CommandHandledByMultipleHandlers command)
+        {
+            Messages.Add(typeof(CommandHandledByMultipleHandlers));
+        }
+    }
+
+    public class CommandHandlerB : ICommandHandler<CommandHandledByMultipleHandlers>
+    {
+        public readonly IList<Type> Messages = new List<Type>();
+
+        public void Handle(CommandHandledByMultipleHandlers command)
+        {
+            Messages.Add(typeof(CommandHandledByMultipleHandlers));
         }
     }
 

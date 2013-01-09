@@ -32,17 +32,18 @@ namespace Regalo.RavenDB.Tests.Unit
             _versionHandlerMock = new Mock<IVersionHandler>();
             _versionHandlerMock.Setup(x => x.GetVersion(It.IsAny<Event>())).Returns<Event>(x => x.Version);
             _versionHandlerMock.Setup(x => x.SetParentVersion(It.IsAny<Event>(), It.IsAny<Guid?>())).Callback<object, Guid?>((x, v) => ((Event)x).ParentVersion = v);
-            Resolver.SetResolver(type =>
+            Resolver.SetResolvers(type =>
             {
                 if (type == typeof(IVersionHandler)) return _versionHandlerMock.Object;
                 return null;
-            });
+            },
+            type => null);
         }
 
         [TearDown]
         public void TearDown()
         {
-            Resolver.ClearResolver();
+            Resolver.ClearResolvers();
 
             _documentStore.Dispose();
             _documentStore = null;

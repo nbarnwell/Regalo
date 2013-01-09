@@ -17,22 +17,23 @@ namespace Regalo.Core.Tests.Unit
             versionHandler.AddConfiguration<UserChangedPassword>(e => e.Version, (e, v) => e.ParentVersion = v);
             versionHandler.AddConfiguration<UserRegistered>(e => e.Version, (e, v) => e.ParentVersion = v);
 
-            Resolver.SetResolver(
-                t =>
+            Resolver.SetResolvers(
+                type =>
                 {
-                    if (t == typeof(IVersionHandler))
+                    if (type == typeof(IVersionHandler))
                     {
                         return versionHandler;
                     }
 
-                    throw new NotSupportedException(string.Format("Nothing registered in SetUp for {0}", t));
-                });
+                    throw new NotSupportedException(string.Format("Nothing registered in SetUp for {0}", type));
+                },
+                type => null);
         }
 
         [TearDown]
         public void TearDown()
         {
-            Resolver.ClearResolver();
+            Resolver.ClearResolvers();
         }
 
         protected void CollectionAssertAreJsonEqual(IEnumerable<object> expected, IEnumerable<object> actual)

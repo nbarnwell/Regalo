@@ -10,28 +10,28 @@ namespace Regalo.Core.Tests.Unit
     public class EventBusTests
     {
         private ObjectEventHandler _objectEventHandler;
+        private EventHandlerA _eventHandlerA;
+        private EventHandlerB _eventHandlerB;
 
         [SetUp]
         public void SetUp()
         {
             _objectEventHandler = new ObjectEventHandler();
-            Resolver.SetResolver(LocateEventHandler);
+            _eventHandlerA = new EventHandlerA();
+            _eventHandlerB = new EventHandlerB();
+            Resolver.SetResolvers(type => null, LocateAllEventHandlers);
         }
 
-        private object LocateEventHandler(Type type)
+        private IEnumerable<object> LocateAllEventHandlers(Type type)
         {
-            if (type.IsAssignableFrom(_objectEventHandler.GetType()))
-            {
-                return _objectEventHandler;
-            }
-
-            throw new NotSupportedException(string.Format("No handler for type {0} registered.", type));
+            return new object[] { _objectEventHandler, _eventHandlerA, _eventHandlerB }
+                .Where(x => type.IsAssignableFrom(x.GetType()));
         }
 
         [TearDown]
         public void TearDown()
         {
-            Resolver.ClearResolver();
+            Resolver.ClearResolvers();
         }
 
         [Test]
@@ -45,12 +45,14 @@ namespace Regalo.Core.Tests.Unit
             };
 
             var result = new List<Type>();
-            Resolver.ClearResolver();
-            Resolver.SetResolver(type =>
-            {
-                result.Add(type);
-                return LocateEventHandler(type);
-            });
+            Resolver.ClearResolvers();
+            Resolver.SetResolvers(
+                type => null,
+                type =>
+                {
+                    result.Add(type);
+                    return LocateAllEventHandlers(type);
+                });
 
             var processor = new EventBus();
 
@@ -77,6 +79,42 @@ namespace Regalo.Core.Tests.Unit
 
             CollectionAssert.AreEqual(expected, _objectEventHandler.Messages);
         }
+
+        [Test]
+        public void GivenAMessageHandledMultipleHandlers_WhenAskedToPublish_ShouldInvokeAllCommandHandlersInCorrectSequence()
+        {
+            var processor = new EventBus();
+
+            processor.Publish(new EventHandledByMultipleHandlers());
+
+            CollectionAssert.AreEqual(new[] { typeof(object) }, _objectEventHandler.Messages);
+            CollectionAssert.AreEqual(new[] { typeof(EventHandledByMultipleHandlers) }, _eventHandlerA.Messages);
+            CollectionAssert.AreEqual(new[] { typeof(EventHandledByMultipleHandlers) }, _eventHandlerB.Messages);
+        }
+    }
+}
+
+public class EventHandledByMultipleHandlers
+{
+}
+
+public class EventHandlerA : IEventHandler<EventHandledByMultipleHandlers>
+{
+    public readonly IList<Type> Messages = new List<Type>();
+
+    public void Handle(EventHandledByMultipleHandlers evt)
+    {
+        Messages.Add(typeof(EventHandledByMultipleHandlers));
+    }
+}
+
+public class EventHandlerB : IEventHandler<EventHandledByMultipleHandlers>
+{
+    public readonly IList<Type> Messages = new List<Type>();
+
+    public void Handle(EventHandledByMultipleHandlers evt)
+    {
+        Messages.Add(typeof(EventHandledByMultipleHandlers));
     }
 }
 

@@ -1,24 +1,31 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace Regalo.Core
 {
     public static class Resolver
     {
-        private static Func<Type, object> _resolver;
+        private static Func<Type, object> _singleResolver;
+        private static Func<Type, IEnumerable<object>> _multipleResolver;
 
-        public static void SetResolver(Func<Type, object> resolver)
+        public static void SetResolvers(Func<Type, object> singleResolver, Func<Type, IEnumerable<object>> multipleResolver)
         {
-            if (_resolver != null)
+            if (singleResolver == null) throw new ArgumentNullException("singleResolver");
+            if (multipleResolver == null) throw new ArgumentNullException("multipleResolver");
+
+            if (_singleResolver != null || _multipleResolver != null)
             {
-                throw new InvalidOperationException("Resolver has already been set. Be sure to call ClearResolver() first if you deliberately wish to change the implementation.");
+                throw new InvalidOperationException("Resolvers have already been set. Be sure to call ClearResolvers() first if you deliberately wish to change the implementation.");
             }
 
-            _resolver = resolver;
+            _singleResolver = singleResolver;
+            _multipleResolver = multipleResolver;
         }
 
-        public static void ClearResolver()
+        public static void ClearResolvers()
         {
-            _resolver = null;
+            _singleResolver = null;
+            _multipleResolver = null;
         }
 
         internal static T Resolve<T>()
@@ -28,12 +35,27 @@ namespace Regalo.Core
 
         internal static object Resolve(Type type)
         {
-            if (_resolver == null)
+            if (_singleResolver == null)
             {
-                throw new InvalidOperationException("Resolver has not been set. Be sure to call Regalo.Core.Resolver.SetResolver() in your application initialisation.");
+                throw new InvalidOperationException("Resolvers have not been set. Be sure to call Regalo.Core.Resolver.SetResolvers() in your application initialisation.");
             }
 
-            return _resolver.Invoke(type);
+            return _singleResolver.Invoke(type);
+        }
+
+        internal static IEnumerable<T> ResolveAll<T>()
+        {
+            return (IEnumerable<T>)ResolveAll(typeof(T));
+        }
+
+        internal static IEnumerable<object> ResolveAll(Type type)
+        {
+            if (_multipleResolver == null)
+            {
+                throw new InvalidOperationException("Resolvers have not been set. Be sure to call Regalo.Core.Resolver.SetResolvers() in your application initialisation.");
+            }
+
+            return _multipleResolver.Invoke(type);
         }
     }
 }

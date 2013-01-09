@@ -14,7 +14,13 @@ namespace Regalo.Core
             var inspector = new TypeInspector();
             var handlers = inspector.GetTypeHierarchy(message.GetType())
                                     .Select(x => new { MessageType = x, HandlerType = messageHandlerOpenType.MakeGenericType(x) })
-                                    .Select(x => new { MethodInfo = FindHandleMethod(x.MessageType, x.HandlerType), Handler = Resolver.Resolve(x.HandlerType) })
+                                    .SelectMany(
+                                        x => Resolver.ResolveAll(x.HandlerType),
+                                        (x, handler) => new
+                                        {
+                                            MethodInfo = FindHandleMethod(x.MessageType, x.HandlerType),
+                                            Handler = handler
+                                        })
                                     .ToList();
 
             if (false == handlers.Any())
