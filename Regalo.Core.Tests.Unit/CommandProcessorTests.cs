@@ -98,7 +98,7 @@ namespace Regalo.Core.Tests.Unit
             Messages.Add(typeof(object));
         }
 
-        public void Handle(SimpleCommandBase command)
+        void ICommandHandler<SimpleCommandBase>.Handle(SimpleCommandBase command)
         {
             Messages.Add(typeof(SimpleCommandBase));
         }
