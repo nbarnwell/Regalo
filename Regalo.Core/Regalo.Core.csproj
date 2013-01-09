@@ -43,6 +43,7 @@
   <ItemGroup>
     <Compile Include="AggregateRoot.cs" />
     <Compile Include="Command.cs" />
+    <Compile Include="CommandProcessor.cs" />
     <Compile Include="Conventions.cs" />
     <Compile Include="Event.cs" />
     <Compile Include="EventSourcing\ConcurrencyConflict.cs" />

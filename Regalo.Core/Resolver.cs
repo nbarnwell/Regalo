@@ -23,7 +23,17 @@ namespace Regalo.Core
 
         internal static T Resolve<T>()
         {
-            return (T)_resolver.Invoke(typeof(T));
+            return (T)Resolve(typeof(T));
+        }
+
+        internal static object Resolve(Type type)
+        {
+            if (_resolver == null)
+            {
+                throw new InvalidOperationException("Resolver has not been set. Be sure to call Regalo.Core.Resolver.SetResolver() in your application initialisation.");
+            }
+
+            return _resolver.Invoke(type);
         }
     }
 }

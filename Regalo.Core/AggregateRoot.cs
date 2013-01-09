@@ -7,7 +7,7 @@ namespace Regalo.Core
 {
     public abstract class AggregateRoot
     {
-        private readonly IDictionary<string, MethodInfo> _applyMethodCache = new Dictionary<string, MethodInfo>();
+        private readonly IDictionary<RuntimeTypeHandle, MethodInfo> _applyMethodCache = new Dictionary<RuntimeTypeHandle, MethodInfo>();
         private readonly IList<object> _uncommittedEvents = new List<object>();
 
         public Guid Id { get; protected set; }
@@ -113,7 +113,7 @@ namespace Regalo.Core
         private MethodInfo FindApplyMethod(Type eventType)
         {
             MethodInfo applyMethod;
-            if (_applyMethodCache.Count == 0 || !_applyMethodCache.TryGetValue(eventType.Name, out applyMethod))
+            if (false == _applyMethodCache.TryGetValue(eventType.TypeHandle, out applyMethod))
             {
                 applyMethod = GetType().GetMethods(BindingFlags.Instance | BindingFlags.NonPublic)
                     .Where(m => m.Name == "Apply")
@@ -124,7 +124,7 @@ namespace Regalo.Core
                             return parameters.Length == 1 && parameters[0].ParameterType == eventType;
                         }).SingleOrDefault();
 
-                _applyMethodCache.Add(eventType.Name, applyMethod);
+                _applyMethodCache.Add(eventType.TypeHandle, applyMethod);
             }
 
             if (Conventions.AggregatesMustImplementApplyMethods && applyMethod == null)

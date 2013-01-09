@@ -58,6 +58,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AggregateTests.cs" />
+    <Compile Include="CommandProcessorTests.cs" />
     <Compile Include="RuntimeConfiguredVersionHandlerTests.cs" />
     <Compile Include="SimpleConcurrencyTests.cs" />
     <Compile Include="RepositoryTests.cs" />
