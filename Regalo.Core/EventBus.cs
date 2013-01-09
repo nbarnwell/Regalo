@@ -1,18 +1,15 @@
-﻿using System.Collections;
+﻿using System;
 using System.Collections.Generic;
-using Regalo.Core;
+using System.Linq;
+using System.Reflection;
 
-namespace Regalo.Testing
+namespace Regalo.Core
 {
-    public class FakeEventBus : IEventBus
+    public class EventBus : MessageProcessorBase, IEventBus
     {
-        private readonly IList<object> _events = new List<object>();
-
-        public IEnumerable<object> Events { get { return _events; } }
-
         public void Publish<TEvent>(TEvent evt)
         {
-            _events.Add(evt);
+            HandleMessage(evt, typeof(IEventHandler<>));
         }
 
         public void Publish<TEvent>(IEnumerable<TEvent> events)
