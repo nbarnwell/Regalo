@@ -7,6 +7,8 @@ namespace Regalo.Core
 {
     public abstract class AggregateRoot
     {
+        private static readonly ILogger __logger = Resolver.Resolve<ILogger>();
+        
         private readonly IDictionary<RuntimeTypeHandle, MethodInfo> _applyMethodCache = new Dictionary<RuntimeTypeHandle, MethodInfo>();
         private readonly IList<object> _uncommittedEvents = new List<object>();
 
@@ -25,17 +27,21 @@ namespace Regalo.Core
             var version = FindCurrentVersion();
 
             BaseVersion = version;
+            int eventCount = _uncommittedEvents.Count;
             _uncommittedEvents.Clear();
+            __logger.Debug(this, "Accepted {0} uncommitted events. Now at base version {1}", eventCount, BaseVersion);
         }
 
         public void ApplyAll(IEnumerable<object> events)
         {
             object lastEvent = null;
+            int i = 0;
             foreach (var evt in events)
             {
                 ApplyEvent(evt);
 
                 lastEvent = evt;
+                i++;
             }
 
             if (lastEvent != null)
@@ -44,6 +50,8 @@ namespace Regalo.Core
                 var currentVersion = versionHandler.GetVersion(lastEvent);
                 BaseVersion = currentVersion;
             }
+
+            __logger.Debug(this, "Applied {0} events. Now at base version {1}", i, BaseVersion);
         }
 
         protected void Record(object evt)
@@ -55,6 +63,8 @@ namespace Regalo.Core
             ValidateHasId();
 
             _uncommittedEvents.Add(evt);
+
+            __logger.Debug(this, "Recorded new event: {0}", evt);
         }
 
         private void SetParentVersion(object evt)

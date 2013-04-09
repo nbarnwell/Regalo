@@ -7,6 +7,11 @@ namespace Regalo.Core
 {
     public class EventBus : MessageProcessorBase, IEventBus
     {
+        public EventBus(ILogger logger) 
+            : base(logger)
+        {
+        }
+
         public void Publish<TEvent>(TEvent evt)
         {
             HandleMessage(evt, typeof(IEventHandler<>));

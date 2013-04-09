@@ -13,19 +13,26 @@ namespace Regalo.Core.Tests.Unit
         [SetUp]
         public void SetUp()
         {
-            var versionHandler = new RuntimeConfiguredVersionHandler();
-            versionHandler.AddConfiguration<UserChangedPassword>(e => e.Version, (e, v) => e.ParentVersion = v);
-            versionHandler.AddConfiguration<UserRegistered>(e => e.Version, (e, v) => e.ParentVersion = v);
+            var _versionHandler = new RuntimeConfiguredVersionHandler();
+            _versionHandler.AddConfiguration<UserChangedPassword>(e => e.Version, (e, v) => e.ParentVersion = v);
+            _versionHandler.AddConfiguration<UserRegistered>(e => e.Version, (e, v) => e.ParentVersion = v);
+
+            var _nullLogger = new NullLogger();
 
             Resolver.SetResolvers(
                 type =>
                 {
                     if (type == typeof(IVersionHandler))
                     {
-                        return versionHandler;
+                        return _versionHandler;
                     }
 
-                    throw new NotSupportedException(string.Format("Nothing registered in SetUp for {0}", type));
+                    if (type == typeof(ILogger))
+                    {
+                        return _nullLogger;
+                    }
+
+                    throw new NotSupportedException(string.Format("TestFixtureBase::SetUp - Nothing registered for {0}", type));
                 },
                 type => null);
         }

@@ -5,14 +5,21 @@ using System.Reflection;
 
 namespace Regalo.Core
 {
-    public class MessageProcessorBase
+    public abstract class MessageProcessorBase
     {
+        private readonly ILogger _logger;
         private readonly IDictionary<RuntimeTypeHandle, MethodInfo> _handleMethodCache = new Dictionary<RuntimeTypeHandle, MethodInfo>();
+
+        protected MessageProcessorBase(ILogger logger)
+        {
+            if (logger == null) throw new ArgumentNullException("logger");
+            _logger = logger;
+        }
 
         protected void HandleMessage<TMessage>(TMessage message, Type messageHandlerOpenType)
         {
             var inspector = new TypeInspector();
-            var handlers = inspector.GetTypeHierarchy(message.GetType())
+            var targets = inspector.GetTypeHierarchy(message.GetType())
                                     .Select(x => new { MessageType = x, HandlerType = messageHandlerOpenType.MakeGenericType(x) })
                                     .SelectMany(
                                         x => Resolver.ResolveAll(x.HandlerType),
@@ -23,14 +30,15 @@ namespace Regalo.Core
                                         })
                                     .ToList();
 
-            if (false == handlers.Any())
+            if (false == targets.Any())
             {
                 throw new InvalidOperationException(string.Format("No handlers registered for: {0}", message));
             }
 
-            foreach (var handler in handlers)
+            foreach (var target in targets)
             {
-                handler.MethodInfo.Invoke(handler.Handler, new object[] { message });
+                _logger.Debug(this, "Invoking {0} with {1}", target.Handler, message);
+                target.MethodInfo.Invoke(target.Handler, new object[] { message });
             }
         }
 

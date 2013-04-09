@@ -53,7 +53,7 @@ namespace Regalo.Core.Tests.Unit
                     return LocateAllCommandHandlers(type);
                 });
 
-            var processor = new CommandProcessor();
+            var processor = new CommandProcessor(new NullLogger());
 
             processor.Process(new SimpleCommand());
 
@@ -70,7 +70,7 @@ namespace Regalo.Core.Tests.Unit
                 typeof(SimpleCommand),
             };
 
-            var processor = new CommandProcessor();
+            var processor = new CommandProcessor(new NullLogger());
 
             processor.Process(new SimpleCommand());
 
@@ -82,7 +82,7 @@ namespace Regalo.Core.Tests.Unit
         [Test]
         public void GivenAMessageHandledMultipleHandlers_WhenAskedToProcess_ShouldInvokeAllCommandHandlersInCorrectSequence()
         {
-            var processor = new CommandProcessor();
+            var processor = new CommandProcessor(new NullLogger());
 
             processor.Process(new CommandHandledByMultipleHandlers());
 

@@ -54,7 +54,7 @@ namespace Regalo.Core.Tests.Unit
                     return LocateAllEventHandlers(type);
                 });
 
-            var processor = new EventBus();
+            var processor = new EventBus(new NullLogger());
 
             processor.Publish(new SimpleEvent());
 
@@ -71,7 +71,7 @@ namespace Regalo.Core.Tests.Unit
                 typeof(SimpleEvent),
             };
 
-            var processor = new EventBus();
+            var processor = new EventBus(new NullLogger());
 
             processor.Publish(new SimpleEvent());
 
@@ -83,7 +83,7 @@ namespace Regalo.Core.Tests.Unit
         [Test]
         public void GivenAMessageHandledMultipleHandlers_WhenAskedToPublish_ShouldInvokeAllCommandHandlersInCorrectSequence()
         {
-            var processor = new EventBus();
+            var processor = new EventBus(new NullLogger());
 
             processor.Publish(new EventHandledByMultipleHandlers());
 
