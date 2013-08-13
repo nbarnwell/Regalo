@@ -45,8 +45,12 @@
     <Compile Include="Command.cs" />
     <Compile Include="CommandProcessor.cs" />
     <Compile Include="Conventions.cs" />
+    <Compile Include="EnumerableExtensions.cs" />
     <Compile Include="Event.cs" />
     <Compile Include="EventBus.cs" />
+    <Compile Include="EventHandlingFailedEvent.cs" />
+    <Compile Include="EventHandlingResultEvent.cs" />
+    <Compile Include="EventHandlingSucceededEvent.cs" />
     <Compile Include="EventSourcing\ConcurrencyConflict.cs" />
     <Compile Include="EventSourcing\EventSourcingRepository.cs" />
     <Compile Include="EventSourcing\IConcurrencyMonitor.cs" />

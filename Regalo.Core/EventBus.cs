@@ -14,7 +14,16 @@ namespace Regalo.Core
 
         public void Publish<TEvent>(TEvent evt)
         {
-            HandleMessage(evt, typeof(IEventHandler<>));
+            try
+            {
+                HandleMessage(evt, typeof(IEventHandler<>));
+            }
+            catch (Exception e)
+            {
+                HandleMessage(new EventHandlingFailedEvent<TEvent>(evt, e), typeof(IEventHandler<>));
+            }
+
+            HandleMessage(new EventHandlingSucceededEvent<TEvent>(evt), typeof(IEventHandler<>));
         }
 
         public void Publish<TEvent>(IEnumerable<TEvent> events)

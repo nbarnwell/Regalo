@@ -8,6 +8,7 @@ using Raven.Client.Document;
 using Raven.Client.Embedded;
 using Regalo.Core;
 using Regalo.Core.EventSourcing;
+using Regalo.Core.Tests.Unit;
 using Regalo.RavenDB.Tests.Unit.DomainModel.Customers;
 
 namespace Regalo.RavenDB.Tests.Unit
@@ -35,6 +36,7 @@ namespace Regalo.RavenDB.Tests.Unit
             Resolver.SetResolvers(type =>
             {
                 if (type == typeof(IVersionHandler)) return _versionHandlerMock.Object;
+                if (type == typeof(ILogger)) return new NullLogger();
                 return null;
             },
             type => null);

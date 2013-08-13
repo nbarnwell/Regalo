@@ -18,19 +18,11 @@ namespace Regalo.Core
 
         protected void HandleMessage<TMessage>(TMessage message, Type messageHandlerOpenType)
         {
-            var inspector = new TypeInspector();
-            var targets = inspector.GetTypeHierarchy(message.GetType())
-                                    .Select(x => new { MessageType = x, HandlerType = messageHandlerOpenType.MakeGenericType(x) })
-                                    .SelectMany(
-                                        x => Resolver.ResolveAll(x.HandlerType),
-                                        (x, handler) => new
-                                        {
-                                            MethodInfo = FindHandleMethod(x.MessageType, x.HandlerType),
-                                            Handler = handler
-                                        })
-                                    .ToList();
+            var messageType = message.GetType();
 
-            if (false == targets.Any())
+            var targets = GetHandlerDescriptors(messageHandlerOpenType, messageType);
+
+            if (!IsEventHandlingResultEvent(messageType) && targets.IsEmpty())
             {
                 throw new InvalidOperationException(string.Format("No handlers registered for: {0}", message));
             }
@@ -40,6 +32,33 @@ namespace Regalo.Core
                 _logger.Debug(this, "Invoking {0} with {1}", target.Handler, message);
                 target.MethodInfo.Invoke(target.Handler, new object[] { message });
             }
+        }
+
+        private static bool IsEventHandlingResultEvent(Type type)
+        {
+            bool result = typeof(EventHandlingResultEvent).IsAssignableFrom(type);
+            return result;
+        }
+
+        private List<HandlerDescriptor> GetHandlerDescriptors(Type messageHandlerOpenType, Type messageType)
+        {
+            var isEventHandlingResultEvent = IsEventHandlingResultEvent(messageType);
+            var inspector = new TypeInspector();
+
+            var messageTypes = isEventHandlingResultEvent
+                                   ? new[] { messageType }
+                                   : inspector.GetTypeHierarchy(messageType);
+
+            var targets = messageTypes.Select(x => new { MessageType = x, HandlerType = messageHandlerOpenType.MakeGenericType(x) })
+                                      .SelectMany(
+                                          x => Resolver.ResolveAll(x.HandlerType),
+                                          (x, handler) => new HandlerDescriptor
+                                          {
+                                              MethodInfo = FindHandleMethod(x.MessageType, x.HandlerType),
+                                              Handler = handler
+                                          })
+                                      .ToList();
+            return targets;
         }
 
         private MethodInfo FindHandleMethod(Type messageType, Type handlerType)
@@ -60,6 +79,12 @@ namespace Regalo.Core
             }
 
             return handleMethod;
+        }
+
+        private class HandlerDescriptor
+        {
+            public MethodInfo MethodInfo { get; set; }
+            public object Handler { get; set; }
         }
     }
 }

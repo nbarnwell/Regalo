@@ -62,13 +62,18 @@ namespace Regalo.Core.Tests.Unit
         private IEnumerable<string> GetJsonList(IEnumerable<object> list)
         {
             return list.Select(x => JsonConvert.SerializeObject(x, Formatting.Indented))
-                .Select(FixVersionGuids)
+                .Select(FixGuids)
                 .ToArray();
         }
 
-        private string FixVersionGuids(string json)
+        private string FixGuids(string json)
         {
             var result = json;
+
+            result = Regex.Replace(
+                    result,
+                    @"""Id""\s*:\s*""(?i:[a-f\d]{8}-[a-f\d]{4}-[a-f\d]{4}-[a-f\d]{4}-[a-f\d]{12})""",
+                    @"""Id"" : ""00000000-0000-0000-0000-000000000000""");
 
             result = Regex.Replace(
                     result,

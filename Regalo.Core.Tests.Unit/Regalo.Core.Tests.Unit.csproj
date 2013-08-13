@@ -59,6 +59,7 @@
   <ItemGroup>
     <Compile Include="AggregateTests.cs" />
     <Compile Include="CommandProcessorTests.cs" />
+    <Compile Include="ConsoleLogger.cs" />
     <Compile Include="EventBusTests.cs" />
     <Compile Include="NullLogger.cs" />
     <Compile Include="RuntimeConfiguredVersionHandlerTests.cs" />
