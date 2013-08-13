@@ -13,7 +13,7 @@ DON'T COPY AND PASTE, JUST TYPE IT IN...
     . .\BuildPackage.ps1
     
 5. Push to github
-    git push origin master
+    git push origin master --tags
 
 6. Push and nuget.org
     gci .\BuildOutput\* -inc *.nupkg | %{ nuget push $_ }
