@@ -37,7 +37,7 @@ namespace Regalo.RavenDB.Tests.Unit
             {
                 if (type == typeof(IVersionHandler)) return _versionHandlerMock.Object;
                 if (type == typeof(ILogger)) return new NullLogger();
-                return null;
+                throw new InvalidOperationException(string.Format("No type of {0} registered.", type));
             },
             type => null);
         }

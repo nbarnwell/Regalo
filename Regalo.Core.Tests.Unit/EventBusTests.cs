@@ -176,7 +176,7 @@ namespace Regalo.Core.Tests.Unit
     }
 
     public class FailingEventHandler : IEventHandler<SimpleEvent>, IEventHandler<EventHandlingFailedEvent<SimpleEvent>>
-    {
+        {
         public readonly IList<Type> TargetsCalled = new List<Type>();
         public readonly IList<Type> MessageTypes = new List<Type>();
 
@@ -192,6 +192,7 @@ namespace Regalo.Core.Tests.Unit
         {
             TargetsCalled.Add(typeof(EventHandlingFailedEvent<SimpleEvent>));
             MessageTypes.Add(evt.GetType());
+        }
         }
     }
 }

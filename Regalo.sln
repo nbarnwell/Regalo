@@ -25,6 +25,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Regalo.Testing", "Regalo.Te
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Regalo.Testing.Tests.Unit", "Regalo.Testing.Tests.Unit\Regalo.Testing.Tests.Unit.csproj", "{48AF838B-F524-47A6-B8FF-CD804F768885}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Regalo.ObjectCompare.Tests.Unit", "Regalo.ObjectCompare.Tests.Unit\Regalo.ObjectCompare.Tests.Unit.csproj", "{700F5B3B-838D-4F38-94BF-95B7C8767834}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Regalo.ObjectCompare", "Regalo.ObjectCompare\Regalo.ObjectCompare.csproj", "{BDC34219-6E54-4580-958E-DCC93B1676E3}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -67,6 +71,14 @@ Global
 		{48AF838B-F524-47A6-B8FF-CD804F768885}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{48AF838B-F524-47A6-B8FF-CD804F768885}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{48AF838B-F524-47A6-B8FF-CD804F768885}.Release|Any CPU.Build.0 = Release|Any CPU
+		{700F5B3B-838D-4F38-94BF-95B7C8767834}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{700F5B3B-838D-4F38-94BF-95B7C8767834}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{700F5B3B-838D-4F38-94BF-95B7C8767834}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{700F5B3B-838D-4F38-94BF-95B7C8767834}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BDC34219-6E54-4580-958E-DCC93B1676E3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BDC34219-6E54-4580-958E-DCC93B1676E3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BDC34219-6E54-4580-958E-DCC93B1676E3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BDC34219-6E54-4580-958E-DCC93B1676E3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
