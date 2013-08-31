@@ -53,7 +53,9 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Regalo.Testing.nuspec" />
+    <None Include="Regalo.Testing.nuspec">
+      <SubType>Designer</SubType>
+    </None>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
