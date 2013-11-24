@@ -47,8 +47,8 @@ namespace Regalo.ObjectCompare
 
             foreach (var property in _properties)
             {
-                var value1 = property.GetValue(object1);
-                var value2 = property.GetValue(object2);
+                var value1 = property.GetValue(object1, null);
+                var value2 = property.GetValue(object2, null);
 
                 if (property.PropertyType.IsPrimitive())
                 {
