@@ -22,6 +22,8 @@ namespace Regalo.Core
 
             var targets = GetHandlerDescriptors(messageHandlerOpenType, messageType);
 
+            // Throw if there are no handlers. Unless it's a success/failure wrapper
+            // event, for which it's not obligatory to have a handler.
             if (!IsEventHandlingResultEvent(messageType) && targets.IsEmpty())
             {
                 throw new InvalidOperationException(string.Format("No handlers registered for: {0}", message));

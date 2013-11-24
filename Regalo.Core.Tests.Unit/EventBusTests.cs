@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using NUnit.Framework;
 using Regalo.Core;
+using Regalo.Testing;
 
 namespace Regalo.Core.Tests.Unit
 {

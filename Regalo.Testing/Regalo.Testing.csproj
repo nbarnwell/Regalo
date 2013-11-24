@@ -33,6 +33,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="nunit.framework">
+      <HintPath>..\packages\NUnit.2.6.3\lib\nunit.framework.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -42,17 +45,39 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AggregateRootTestDataBuilderBase.cs" />
+    <Compile Include="ApplicationServiceTestBase.cs" />
+    <Compile Include="ConsoleLogger.cs" />
     <Compile Include="FakeEventBus.cs" />
+    <Compile Include="IGivenSetter.cs" />
+    <Compile Include="IHandlerSetter.cs" />
+    <Compile Include="IScenarioAssert.cs" />
+    <Compile Include="ITestDataBuilder.cs" />
+    <Compile Include="IThenSetter.cs" />
+    <Compile Include="IWhenSetter.cs" />
+    <Compile Include="NullLogger.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\AssemblyInfo.Version.cs" />
+    <Compile Include="Scenario.cs" />
+    <Compile Include="ScenarioAssert.cs" />
+    <Compile Include="ScenarioGivenSetter.cs" />
+    <Compile Include="ScenarioHandlerSetter.cs" />
+    <Compile Include="ScenarioThenSetter.cs" />
+    <Compile Include="ScenarioWhenSetter.cs" />
+    <Compile Include="TestingMessageHandlerContext.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Regalo.Core\Regalo.Core.csproj">
       <Project>{80473978-8D0F-4AD4-983E-600E516D49AB}</Project>
       <Name>Regalo.Core</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Regalo.ObjectCompare\Regalo.ObjectCompare.csproj">
+      <Project>{bdc34219-6e54-4580-958e-dcc93b1676e3}</Project>
+      <Name>Regalo.ObjectCompare</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <None Include="packages.config" />
     <None Include="Regalo.Testing.nuspec">
       <SubType>Designer</SubType>
     </None>

@@ -10,6 +10,7 @@ using Regalo.Core;
 using Regalo.Core.EventSourcing;
 using Regalo.Core.Tests.Unit;
 using Regalo.RavenDB.Tests.Unit.DomainModel.Customers;
+using Regalo.Testing;
 
 namespace Regalo.RavenDB.Tests.Unit
 {

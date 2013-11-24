@@ -60,17 +60,19 @@ namespace Regalo.Core
 
         private static object MakeSuccessEvent(object evt)
         {
-            var eventType = evt.GetType();
-            var wrapperEventType = typeof(EventHandlingSucceededEvent<>).MakeGenericType(eventType);
-            var wrapperEvent = Activator.CreateInstance(wrapperEventType, evt);
-            return wrapperEvent;
+            return WrapEvent(evt, typeof(EventHandlingSucceededEvent<>));
         }
 
         private static object MakeFailureEvent(object evt, Exception e)
         {
+            return WrapEvent(evt, typeof(EventHandlingFailedEvent<>));
+        }
+
+        private static object WrapEvent(object evt, Type wrapperEventOpenType)
+        {
             var eventType = evt.GetType();
-            var wrapperEventType = typeof(EventHandlingFailedEvent<>).MakeGenericType(eventType);
-            var wrapperEvent = Activator.CreateInstance(wrapperEventType, evt, e);
+            var wrapperEventTypeClosedType = wrapperEventOpenType.MakeGenericType(eventType);
+            var wrapperEvent = Activator.CreateInstance(wrapperEventTypeClosedType, evt);
             return wrapperEvent;
         }
     }

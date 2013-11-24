@@ -1,6 +1,7 @@
-﻿using System;
+using System;
+using Regalo.Core;
 
-namespace Regalo.Core.Tests.Unit
+namespace Regalo.Testing
 {
     public class NullLogger : ILogger
     {

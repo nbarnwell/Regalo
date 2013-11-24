@@ -45,6 +45,7 @@
     <Compile Include="Command.cs" />
     <Compile Include="CommandProcessor.cs" />
     <Compile Include="Conventions.cs" />
+    <Compile Include="DefaultVersionHandler.cs" />
     <Compile Include="EnumerableExtensions.cs" />
     <Compile Include="Event.cs" />
     <Compile Include="EventBus.cs" />
@@ -64,9 +65,11 @@
     <Compile Include="IEventBus.cs" />
     <Compile Include="IEventHandler.cs" />
     <Compile Include="ILogger.cs" />
+    <Compile Include="IMessageHandlerContext.cs" />
     <Compile Include="IRepository.cs" />
     <Compile Include="IVersionHandler.cs" />
     <Compile Include="Message.cs" />
+    <Compile Include="MessageHandlerContext.cs" />
     <Compile Include="MessageProcessorBase.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\AssemblyInfo.Version.cs" />

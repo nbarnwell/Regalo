@@ -42,6 +42,11 @@
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SalesOrders\ItemsAddedToOrder.cs" />
+    <Compile Include="SalesOrders\PlaceSalesOrder.cs" />
+    <Compile Include="SalesOrders\SalesOrder.cs" />
+    <Compile Include="SalesOrders\PlaceSalesOrderCommandHandler.cs" />
+    <Compile Include="SalesOrders\SalesOrderCreated.cs" />
+    <Compile Include="SalesOrders\SalesOrderPlaced.cs" />
     <Compile Include="SalesOrders\TransactionPlaced.cs" />
     <Compile Include="Users\User.cs" />
     <Compile Include="Users\UserChangedPassword.cs" />

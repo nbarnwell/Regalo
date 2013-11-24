@@ -5,6 +5,7 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using NUnit.Framework;
 using Regalo.Core.Tests.DomainModel.Users;
+using Regalo.Testing;
 
 namespace Regalo.Core.Tests.Unit
 {

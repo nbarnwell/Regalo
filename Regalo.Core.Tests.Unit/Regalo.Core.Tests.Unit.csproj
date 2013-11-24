@@ -42,9 +42,9 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Newtonsoft.Json.4.5.7\lib\net40\Newtonsoft.Json.dll</HintPath>
     </Reference>
-    <Reference Include="nunit.framework, Version=2.6.2.12296, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77, processorArchitecture=MSIL">
+    <Reference Include="nunit.framework, Version=2.6.3.13283, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\NUnit.2.6.2\lib\nunit.framework.dll</HintPath>
+      <HintPath>..\packages\NUnit.2.6.3\lib\nunit.framework.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -57,9 +57,7 @@
   <ItemGroup>
     <Compile Include="AggregateTests.cs" />
     <Compile Include="CommandProcessorTests.cs" />
-    <Compile Include="ConsoleLogger.cs" />
     <Compile Include="EventBusTests.cs" />
-    <Compile Include="NullLogger.cs" />
     <Compile Include="RuntimeConfiguredVersionHandlerTests.cs" />
     <Compile Include="SimpleConcurrencyTests.cs" />
     <Compile Include="RepositoryTests.cs" />
@@ -79,6 +77,10 @@
     <ProjectReference Include="..\Regalo.Core\Regalo.Core.csproj">
       <Project>{80473978-8D0F-4AD4-983E-600E516D49AB}</Project>
       <Name>Regalo.Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Regalo.Testing\Regalo.Testing.csproj">
+      <Project>{50425006-B901-4461-99D5-7BAE8FFAFA54}</Project>
+      <Name>Regalo.Testing</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup />
