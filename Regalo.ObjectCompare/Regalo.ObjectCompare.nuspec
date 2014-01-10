@@ -8,13 +8,12 @@
     <owners>Neil Barnwell</owners>
     <projectUrl>https://github.com/nbarnwell/Regalo</projectUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <description>Simple, fully unit-tested fake implementations of interfaces from Regalo.Core, to aid unit testing.</description>
+    <description>A simple library that compares objects (useful for unit testing) using reflection.</description>
     <releaseNotes></releaseNotes>
     <copyright>Copyright 2012</copyright>
-    <tags>CQRS EventSourcing</tags>
+    <tags>CQRS EventSourcing testing reflection</tags>
     <dependencies>
         <dependency id="Regalo.Core" version="$version$" />
-        <dependency id="Regalo.ObjectCompare" version="$version$" />
     </dependencies>
   </metadata>
 </package>
