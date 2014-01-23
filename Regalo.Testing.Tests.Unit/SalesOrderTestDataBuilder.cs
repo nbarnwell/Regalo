@@ -15,7 +15,6 @@ namespace Regalo.Testing.Tests.Unit
 
         protected override SalesOrder BuildAggregate()
         {
-            _order.AcceptUncommittedEvents();
             return _order;
         }
 

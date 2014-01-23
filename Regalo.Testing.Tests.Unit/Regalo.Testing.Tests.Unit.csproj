@@ -60,6 +60,10 @@
       <Project>{80473978-8D0F-4AD4-983E-600E516D49AB}</Project>
       <Name>Regalo.Core</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Regalo.ObjectCompare\Regalo.ObjectCompare.csproj">
+      <Project>{BDC34219-6E54-4580-958E-DCC93B1676E3}</Project>
+      <Name>Regalo.ObjectCompare</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Regalo.Testing\Regalo.Testing.csproj">
       <Project>{50425006-B901-4461-99D5-7BAE8FFAFA54}</Project>
       <Name>Regalo.Testing</Name>

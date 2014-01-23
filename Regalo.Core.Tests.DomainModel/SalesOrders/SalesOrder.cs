@@ -14,6 +14,11 @@ namespace Regalo.Core.Tests.DomainModel.SalesOrders
             Record(new ItemsAddedToOrder(Id, sku, quantity));
         }
 
+        public void PlaceOrder()
+        {
+            Record(new SalesOrderPlaced(Id));
+        }
+
         private void Apply(SalesOrderCreated evt)
         {
             Id = evt.AggregateId;

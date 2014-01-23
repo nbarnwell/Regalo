@@ -10,7 +10,6 @@ namespace Regalo.Testing
         public T Build()
         {
             var item = BuildAggregate();
-            item.AcceptUncommittedEvents();
             return item;
         }
 

@@ -2,6 +2,6 @@
 {
     public interface IObjectComparer
     {
-        bool AreEqual(object object1, object object2);
+        ObjectComparisonResult AreEqual(object object1, object object2);
     }
 }

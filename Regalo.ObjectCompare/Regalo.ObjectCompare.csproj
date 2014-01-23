@@ -40,6 +40,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ObjectComparisonException.cs" />
+    <Compile Include="ObjectComparisonResult.cs" />
     <Compile Include="Properties\AssemblyInfo.Version.cs" />
     <Compile Include="IObjectComparer.cs" />
     <Compile Include="IObjectComparerProvider.cs" />

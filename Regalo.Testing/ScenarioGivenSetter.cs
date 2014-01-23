@@ -20,6 +20,8 @@ namespace Regalo.Testing
         public IWhenSetter<TEntity, THandler> Given(ITestDataBuilder<TEntity> testDataBuilder)
         {
             var entity = testDataBuilder.Build();
+            _context.SaveAndPublishEvents(entity);
+            _context.ClearGeneratedEvents();
             return new ScenarioWhenSetter<TEntity, THandler>(entity, _handler, _context);
         }
     }

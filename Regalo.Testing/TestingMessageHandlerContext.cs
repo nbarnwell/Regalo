@@ -7,17 +7,17 @@ namespace Regalo.Testing
     public class TestingMessageHandlerContext<TEntity> : IMessageHandlerContext<TEntity> 
         where TEntity : AggregateRoot, new()
     {
-        private readonly IList<object> _events = new List<object>();
+        private readonly IList<object>        _events = new List<object>();
         private readonly IRepository<TEntity> _repository;
-        private readonly IEventBus _eventBus;
+        private readonly IEventBus            _eventBus;
 
         public TestingMessageHandlerContext(IRepository<TEntity> repository, IEventBus eventBus)
         {
             if (repository == null) throw new ArgumentNullException("repository");
-            if (eventBus == null) throw new ArgumentNullException("eventBus");
+            if (eventBus == null)   throw new ArgumentNullException("eventBus");
 
             _repository = repository;
-            _eventBus = eventBus;
+            _eventBus   = eventBus;
         }
 
         public TEntity Get(Guid id)
@@ -40,6 +40,11 @@ namespace Regalo.Testing
         public IEnumerable<object> GetGeneratedEvents()
         {
             return _events;
+        }
+
+        public void ClearGeneratedEvents()
+        {
+            _events.Clear();
         }
     }
 }

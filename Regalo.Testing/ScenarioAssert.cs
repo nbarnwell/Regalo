@@ -32,13 +32,18 @@ namespace Regalo.Testing
              * events from the repository and eventbus, and compare both with the
              * expected events list passed-in using Regalo.Object compare.
              */
+
+            var dynamicHandler = (dynamic)_handler;
+            dynamicHandler.Handle(_command);
+
             var eventsStoredToEventStore = _context.GetGeneratedEvents();
 
             var comparerProvider = new ObjectComparerProvider();
             var comparer = comparerProvider.ComparerFor(typeof(object[]));
-            if (false == comparer.AreEqual(_expected, eventsStoredToEventStore))
+            ObjectComparisonResult result = comparer.AreEqual(_expected, eventsStoredToEventStore);
+            if (!result.AreEqual)
             {
-                throw new AssertionException("Actual events did not match expected events.");
+                throw new AssertionException("Actual events did not match expected events. " + result.InequalityReason);
             }
         }
     }

@@ -2,6 +2,7 @@
 using NUnit.Framework;
 using Regalo.Core;
 using Regalo.Core.Tests.DomainModel.SalesOrders;
+using Regalo.ObjectCompare;
 
 namespace Regalo.Testing.Tests.Unit
 {
@@ -30,6 +31,14 @@ namespace Regalo.Testing.Tests.Unit
                 {
                     return null;
                 });
+
+            ObjectComparisonResult.ThrowOnFail = true;
+        }
+
+        [TearDown]
+        public void TearDown()
+        {
+            ObjectComparisonResult.ThrowOnFail = false;
         }
 
         [Test]
