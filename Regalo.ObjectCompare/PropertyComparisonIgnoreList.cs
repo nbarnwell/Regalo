@@ -33,8 +33,11 @@ namespace Regalo.ObjectCompare
 
         private static Func<Ignore, bool> WhereIgnored(Type owningType, string propertyToIgnore)
         {
-            return x => owningType.IsAssignableFrom(x.Type)
-                        && x.Name.Equals(propertyToIgnore, StringComparison.InvariantCultureIgnoreCase);
+            Type type = owningType;
+            string name = propertyToIgnore;
+
+            return x => (type.IsAssignableFrom(x.Type) || x.Type.IsAssignableFrom(type))
+                        && x.Name.Equals(name, StringComparison.InvariantCultureIgnoreCase);
         }
 
         public bool Contains(Type owningType, string propertyName)

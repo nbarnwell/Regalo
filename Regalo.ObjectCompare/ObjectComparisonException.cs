@@ -1,12 +1,16 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace Regalo.ObjectCompare
 {
     public class ObjectComparisonException : Exception
     {
-        public ObjectComparisonException(string inequalityReason)
+        public IEnumerable<string> PropertyChainDescription { get; private set; }
+
+        public ObjectComparisonException(string inequalityReason, IEnumerable<string> propertyChainDescription)
             : base(inequalityReason)
         {
+            PropertyChainDescription = propertyChainDescription;
         }
     }
 }

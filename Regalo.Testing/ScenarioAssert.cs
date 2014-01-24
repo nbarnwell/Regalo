@@ -33,8 +33,7 @@ namespace Regalo.Testing
              * expected events list passed-in using Regalo.Object compare.
              */
 
-            var dynamicHandler = (dynamic)_handler;
-            dynamicHandler.Handle(_command);
+            ((dynamic)_handler).Handle(_command);
 
             var eventsStoredToEventStore = _context.GetGeneratedEvents();
 

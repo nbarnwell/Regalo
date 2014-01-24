@@ -51,6 +51,14 @@
     <Compile Include="TypeExtensionsTests.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Regalo.Core.Tests.DomainModel\Regalo.Core.Tests.DomainModel.csproj">
+      <Project>{332AA28A-3912-4ED3-AE65-0D9F0C2AE90E}</Project>
+      <Name>Regalo.Core.Tests.DomainModel</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Regalo.Core\Regalo.Core.csproj">
+      <Project>{80473978-8D0F-4AD4-983E-600E516D49AB}</Project>
+      <Name>Regalo.Core</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Regalo.ObjectCompare\Regalo.ObjectCompare.csproj">
       <Project>{BDC34219-6E54-4580-958E-DCC93B1676E3}</Project>
       <Name>Regalo.ObjectCompare</Name>

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -9,6 +10,7 @@ namespace Regalo.ObjectCompare
 {
     public class ObjectComparer : IObjectComparer
     {
+        private readonly Stack<string> _propertyComparisonStack = new Stack<string>();
         private readonly PropertyComparisonIgnoreList _ignores = new PropertyComparisonIgnoreList();
 
         public ObjectComparisonResult AreEqual(object object1, object object2)
@@ -20,7 +22,7 @@ namespace Regalo.ObjectCompare
 
             if ((object1 == null) != (object2 == null))
             {
-                return ObjectComparisonResult.Fail("Nullity differs. Object1 is {0} while Object2 is {1}.", object1 ?? "null", object2 ?? "null");
+                return ObjectComparisonResult.Fail(_propertyComparisonStack, "Nullity differs. Object1 is {0} while Object2 is {1}.", object1 ?? "null", object2 ?? "null");
             }
 
             var object1Type = object1.GetType();
@@ -31,7 +33,7 @@ namespace Regalo.ObjectCompare
                 // Let the type check go if they're both at least enumerable
                 if (false == (object1.GetType().IsEnumerable() && object2.GetType().IsEnumerable()))
                 {
-                    return ObjectComparisonResult.Fail("Objects are of different type. Object1 is {0} while Object2 is {1}.", object1Type, object2Type);
+                    return ObjectComparisonResult.Fail(_propertyComparisonStack, "Objects are of different type. Object1 is {0} while Object2 is {1}.", object1Type, object2Type);
                 }
             }
 
@@ -54,11 +56,11 @@ namespace Regalo.ObjectCompare
             return this;
         }
 
-        private static ObjectComparisonResult ArePrimitivesEqual(object value2, object value1)
+        private ObjectComparisonResult ArePrimitivesEqual(object value2, object value1)
         {
             if (!value2.Equals(value1))
             {
-                return ObjectComparisonResult.Fail("Primitive values differ. Value1: {0}, Value2: {1}.", value1, value2);
+                return ObjectComparisonResult.Fail(_propertyComparisonStack, "Primitive values differ. Value1: {0}, Value2: {1}.", value1, value2);
             }
 
             return ObjectComparisonResult.Success();
@@ -76,20 +78,26 @@ namespace Regalo.ObjectCompare
 
             foreach (var property in properties)
             {
-                if (_ignores.Contains(typeBeingCompared, property.Name))
+                if (false == _ignores.Contains(typeBeingCompared, property.Name))
                 {
-                    continue;
-                }
+                    _propertyComparisonStack.Push(property.Name);
+                    try
+                    {
+                        var value1 = property.GetValue(object1, null);
+                        var value2 = property.GetValue(object2, null);
 
-                var value1 = property.GetValue(object1, null);
-                var value2 = property.GetValue(object2, null);
+                        // NOTE: Recursion
+                        var result = AreEqual(value1, value2);
 
-                // NOTE: Recursion
-                var result = AreEqual(value1, value2);
-
-                if (!result.AreEqual)
-                {
-                    return result;
+                        if (!result.AreEqual)
+                        {
+                            return result;
+                        }
+                    }
+                    finally
+                    {
+                        _propertyComparisonStack.Pop();
+                    }
                 }
             }
 
@@ -118,7 +126,7 @@ namespace Regalo.ObjectCompare
 
             if (hasNext1 != hasNext2)
             {
-                return ObjectComparisonResult.Fail("Enumerable properties have different lengths.");
+                return ObjectComparisonResult.Fail(_propertyComparisonStack, "Enumerable properties have different lengths.");
             }
 
             return ObjectComparisonResult.Success();

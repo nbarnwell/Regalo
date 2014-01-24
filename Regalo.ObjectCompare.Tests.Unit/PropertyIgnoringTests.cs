@@ -1,4 +1,7 @@
-﻿using NUnit.Framework;
+﻿using System;
+using NUnit.Framework;
+using Regalo.Core;
+using Regalo.Core.Tests.DomainModel.SalesOrders;
 
 namespace Regalo.ObjectCompare.Tests.Unit
 {
@@ -26,13 +29,23 @@ namespace Regalo.ObjectCompare.Tests.Unit
         }
 
         [Test]
-        public void IgnoreSamePropertyThroughoutTypeHierarchy()
+        public void IgnoreSamePropertyThroughoutTypeHierarchyParents()
         {
             var ignoreList = new PropertyComparisonIgnoreList();
-            ignoreList.Add<InheritsSimpleObject, string>(x => x.StringProperty1);
+            ignoreList.Add<SalesOrderCreated, Guid?>(x => x.ParentVersion);
 
-            Assert.That(ignoreList.Contains(typeof(InheritsSimpleObject), "StringProperty1"), Is.True);
-            Assert.That(ignoreList.Contains(typeof(SimpleObject), "StringProperty1"), Is.True);
+            Assert.That(ignoreList.Contains(typeof(SalesOrderCreated), "ParentVersion"), Is.True);
+            Assert.That(ignoreList.Contains(typeof(Event), "ParentVersion"), Is.True);
+        }
+
+        [Test]
+        public void IgnoreSamePropertyThroughoutTypeHierarchyChildren()
+        {
+            var ignoreList = new PropertyComparisonIgnoreList();
+            ignoreList.Add<Event, Guid?>(x => x.ParentVersion);
+
+            Assert.That(ignoreList.Contains(typeof(SalesOrderCreated), "ParentVersion"), Is.True);
+            Assert.That(ignoreList.Contains(typeof(Event), "ParentVersion"), Is.True);
         }
     }
 
