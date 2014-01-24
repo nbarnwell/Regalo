@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Linq.Expressions;
 
 namespace Regalo.ObjectCompare
 {
     public class PropertyComparisonIgnoreList
     {
-        private readonly IDictionary<RuntimeTypeHandle, HashSet<string>> _ignored = new Dictionary<RuntimeTypeHandle, HashSet<string>>();
+        private readonly IList<Ignore> _ignored = new List<Ignore>(); 
 
         public void Add<T, TProperty>(Expression<Func<T, TProperty>> expression)
         {
@@ -19,29 +20,38 @@ namespace Regalo.ObjectCompare
                     "expression");
             }
 
-            var type = typeof(T);
-            HashSet<string> propertiesIgnoredForType;
-            if (false == _ignored.TryGetValue(type.TypeHandle, out propertiesIgnoredForType))
-            {
-                propertiesIgnoredForType = new HashSet<string>();
-                _ignored.Add(type.TypeHandle, propertiesIgnoredForType);
-            }
+            var owningType = typeof(T);
+            var propertyToIgnore = me.Member.Name;
 
-            if (false == propertiesIgnoredForType.Contains(me.Member.Name))
+            var existing = _ignored.SingleOrDefault(WhereIgnored(owningType, propertyToIgnore));
+
+            if (null == existing)
             {
-                propertiesIgnoredForType.Add(me.Member.Name);
+                _ignored.Add(new Ignore(owningType, propertyToIgnore));
             }
         }
 
-        public bool Contains(Type type, string propertyName)
+        private static Func<Ignore, bool> WhereIgnored(Type owningType, string propertyToIgnore)
         {
-            HashSet<string> propertiesIgnoredForType;
-            if (false == _ignored.TryGetValue(type.TypeHandle, out propertiesIgnoredForType))
-            {
-                return false;
-            }
+            return x => owningType.IsAssignableFrom(x.Type)
+                        && x.Name.Equals(propertyToIgnore, StringComparison.InvariantCultureIgnoreCase);
+        }
 
-            return propertiesIgnoredForType.Contains(propertyName);
+        public bool Contains(Type owningType, string propertyName)
+        {
+            return _ignored.Any(WhereIgnored(owningType, propertyName));
+        }
+
+        private class Ignore
+        {
+            public Type   Type { get; private set; }
+            public string Name { get; private set; }
+
+            public Ignore(Type type, string name)
+            {
+                Type = type;
+                Name = name;
+            }
         }
     }
 }
