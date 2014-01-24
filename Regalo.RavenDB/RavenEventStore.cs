@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Raven.Abstractions.Data;
 using Raven.Client;
+using Raven.Client.Document;
 using Regalo.Core;
 using Regalo.Core.EventSourcing;
 
@@ -39,6 +41,8 @@ namespace Regalo.RavenDB
                     stream = new EventStream(aggregateIdAsString);
                     stream.Append(events);
                     session.Store(stream);
+
+                    SetRavenCollectionName(events, session, stream);
                 }
                 else
                 {
@@ -46,6 +50,16 @@ namespace Regalo.RavenDB
                 }
 
                 session.SaveChanges();
+            }
+        }
+
+        private static void SetRavenCollectionName(IEnumerable<object> events, IDocumentSession session, EventStream stream)
+        {
+            if (Conventions.FindAggregateTypeForEventType != null)
+            {
+                var aggregateType = Conventions.FindAggregateTypeForEventType(events.First().GetType());
+                session.Advanced.GetMetadataFor(stream)[Constants.RavenEntityName] =
+                    DocumentConvention.DefaultTypeTagName(aggregateType);
             }
         }
 

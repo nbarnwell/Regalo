@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Moq;
 using NUnit.Framework;
+using Raven.Abstractions.Data;
 using Raven.Client;
 using Raven.Client.Document;
 using Raven.Client.Embedded;
@@ -23,12 +24,12 @@ namespace Regalo.RavenDB.Tests.Unit
         [SetUp]
         public void SetUp()
         {
-            _documentStore = new EmbeddableDocumentStore { RunInMemory = true };
-            //_documentStore = new DocumentStore
-            //{
-            //    Url = "http://localhost:8080/",
-            //    DefaultDatabase = "Regalo.RavenDB.Tests.UnitPersistenceTests"
-            //};
+            //_documentStore = new EmbeddableDocumentStore { RunInMemory = true };
+            _documentStore = new DocumentStore
+            {
+                Url = "http://localhost:8080/",
+                DefaultDatabase = "Regalo.RavenDB.Tests.UnitPersistenceTests"
+            };
             _documentStore.Initialize();
 
             _versionHandlerMock = new Mock<IVersionHandler>();
@@ -46,6 +47,8 @@ namespace Regalo.RavenDB.Tests.Unit
         [TearDown]
         public void TearDown()
         {
+            Conventions.SetFindAggregateTypeForEventType(null);
+
             Resolver.ClearResolvers();
 
             _documentStore.Dispose();
@@ -184,6 +187,40 @@ namespace Regalo.RavenDB.Tests.Unit
 
             // Act / Assert
             Assert.Throws<ArgumentOutOfRangeException>(() => store.Load(customerId, Guid.Parse("00000000-0000-0000-0000-000000000001")));
+        }
+
+        [Test]
+        public void Saving_GivenEventMappedToAggregateType_ThenShouldSetRavenCollectionName()
+        {
+            IEventStore store = new RavenEventStore(_documentStore, _versionHandlerMock.Object);
+
+            Conventions.SetFindAggregateTypeForEventType(
+                type =>
+                {
+                    if (type == typeof(CustomerSignedUp))
+                    {
+                        return typeof(Customer);
+                    }
+
+                    return typeof(EventStream);
+                });
+
+            var customerId = Guid.NewGuid();
+            var storedEvents = new object[]
+                              {
+                                  new CustomerSignedUp(customerId), 
+                                  new SubscribedToNewsletter("latest"), 
+                                  new SubscribedToNewsletter("top")
+                              };
+            store.Store(customerId, storedEvents);
+
+            using (var session = _documentStore.OpenSession())
+            {
+                var eventStream = session.Load<EventStream>(customerId.ToString());
+                var entityName = session.Advanced.GetMetadataFor(eventStream)[Constants.RavenEntityName].ToString();
+
+                Assert.That(entityName, Is.EqualTo("Customers"));
+            }
         }
     }
 }
