@@ -24,7 +24,7 @@ namespace Regalo.ObjectCompare.Tests.Unit
         [Test]
         public void CompareEmptyObjects()
         {
-            var comparer = new ObjectComparer(typeof(NonBuiltInEmptyClass), _objectComparerProvider);
+            var comparer = new ObjectComparer(_objectComparerProvider);
             var object1 = new NonBuiltInEmptyClass();
             var object2 = new NonBuiltInEmptyClass();
 
@@ -36,7 +36,7 @@ namespace Regalo.ObjectCompare.Tests.Unit
         [Test]
         public void CompareNullWithAnObject()
         {
-            var comparer = new ObjectComparer(typeof(NonBuiltInEmptyClass), _objectComparerProvider);
+            var comparer = new ObjectComparer(_objectComparerProvider);
             var object1 = new NonBuiltInEmptyClass();
 
             var result = comparer.AreEqual(object1, null);
@@ -47,7 +47,7 @@ namespace Regalo.ObjectCompare.Tests.Unit
         [Test]
         public void CompareNullWithNull()
         {
-            var comparer = new ObjectComparer(typeof(NonBuiltInEmptyClass), _objectComparerProvider);
+            var comparer = new ObjectComparer(_objectComparerProvider);
 
             var result = comparer.AreEqual(null, null);
 
@@ -57,7 +57,7 @@ namespace Regalo.ObjectCompare.Tests.Unit
         [Test]
         public void CompareSameObjects()
         {
-            var comparer = new ObjectComparer(typeof(NonBuiltInEmptyClass), _objectComparerProvider);
+            var comparer = new ObjectComparer(_objectComparerProvider);
             var obj = new NonBuiltInEmptyClass();
 
             var result = comparer.AreEqual(obj, obj);
@@ -68,7 +68,7 @@ namespace Regalo.ObjectCompare.Tests.Unit
         [Test]
         public void CompareSimpleObjectsThatShouldMatch()
         {
-            var comparer = new ObjectComparer(typeof(NonBuiltInClass), _objectComparerProvider);
+            var comparer = new ObjectComparer(_objectComparerProvider);
             var object1 = new NonBuiltInClass { TheValue = "Value1" };
             var object2 = new NonBuiltInClass { TheValue = "Value1" };
 
@@ -80,7 +80,7 @@ namespace Regalo.ObjectCompare.Tests.Unit
         [Test]
         public void CompareSimpleObjectsThatShouldNotMatch()
         {
-            var comparer = new ObjectComparer(typeof(NonBuiltInClass), _objectComparerProvider);
+            var comparer = new ObjectComparer(_objectComparerProvider);
             var object1 = new NonBuiltInClass { TheValue = "Value1" };
             var object2 = new NonBuiltInClass { TheValue = "Value2" };
 
@@ -92,7 +92,7 @@ namespace Regalo.ObjectCompare.Tests.Unit
         [Test]
         public void CompareComplexObjectsThatShouldMatch()
         {
-            var comparer = new ObjectComparer(typeof(ComplexNonBuiltInClass), _objectComparerProvider);
+            var comparer = new ObjectComparer(_objectComparerProvider);
             var object1 = new ComplexNonBuiltInClass { TheValue = new NonBuiltInClass{TheValue = "Value1"} };
             var object2 = new ComplexNonBuiltInClass { TheValue = new NonBuiltInClass{TheValue = "Value1"} };
 
@@ -104,7 +104,7 @@ namespace Regalo.ObjectCompare.Tests.Unit
         [Test]
         public void CompareComplexObjectsThatShouldNotMatch()
         {
-            var comparer = new ObjectComparer(typeof(ComplexNonBuiltInClass), _objectComparerProvider);
+            var comparer = new ObjectComparer(_objectComparerProvider);
             var object1 = new ComplexNonBuiltInClass { TheValue = new NonBuiltInClass{TheValue = "Value1"} };
             var object2 = new ComplexNonBuiltInClass { TheValue = new NonBuiltInClass{TheValue = "Value2"} };
 
@@ -116,7 +116,7 @@ namespace Regalo.ObjectCompare.Tests.Unit
         [Test]
         public void CompareObjectsWithEnumerableProperties()
         {
-            var comparer = new ObjectComparer(typeof(ComplexNonBuiltInWithEnumerablePropertyClass), _objectComparerProvider);
+            var comparer = new ObjectComparer(_objectComparerProvider);
             var object1 = CreateComplexNonBuiltInWithEnumerablePropertyClass(2);
             var object2 = CreateComplexNonBuiltInWithEnumerablePropertyClass(2);
 
@@ -128,7 +128,7 @@ namespace Regalo.ObjectCompare.Tests.Unit
         [Test]
         public void CompareObjectsWithUnevenEnumerableProperties()
         {
-            var comparer = new ObjectComparer(typeof(ComplexNonBuiltInWithEnumerablePropertyClass), _objectComparerProvider);
+            var comparer = new ObjectComparer(_objectComparerProvider);
             var object1 = CreateComplexNonBuiltInWithEnumerablePropertyClass(2);
             var object2 = CreateComplexNonBuiltInWithEnumerablePropertyClass(3);
 
@@ -140,7 +140,7 @@ namespace Regalo.ObjectCompare.Tests.Unit
         [Test]
         public void CompareObjectsWithUnevenEnumerableProperties2()
         {
-            var comparer = new ObjectComparer(typeof(ComplexNonBuiltInWithEnumerablePropertyClass), _objectComparerProvider);
+            var comparer = new ObjectComparer(_objectComparerProvider);
             var object1 = CreateComplexNonBuiltInWithEnumerablePropertyClass(3);
             var object2 = CreateComplexNonBuiltInWithEnumerablePropertyClass(2);
 
@@ -149,21 +149,22 @@ namespace Regalo.ObjectCompare.Tests.Unit
             Assert.IsFalse(result.AreEqual, "Objects should not be equal.");
         }
 
-        //[Test]
-        //public void IgnoreSpecifyProperties()
-        //{
-        //    var comparer = new ObjectComparer(typeof(NonBuiltInClass), _objectComparerProvider)
-        //        .Ignore(x => x.TheValue);
+        [Test]
+        public void IgnoreSpecificProperties()
+        {
+            _objectComparerProvider.Ignore<NonBuiltInClass, string>(x => x.TheValue);
+            
+            var comparer = new ObjectComparer(_objectComparerProvider);
 
-        //    var object1 = new NonBuiltInClass();
-        //    var object2 = new NonBuiltInClass();
-        //    object1.TheValue = "Something";
-        //    object2.TheValue = "SomethingElse";
+            var object1 = new NonBuiltInClass();
+            var object2 = new NonBuiltInClass();
+            object1.TheValue = "Something";
+            object2.TheValue = "SomethingElse";
 
-        //    var result = comparer.AreEqual(object1, object2);
+            var result = comparer.AreEqual(object1, object2);
 
-        //    Assert.IsTrue(result.AreEqual, "Objects should be equal despite ignored property being different.");
-        //}
+            Assert.IsTrue(result.AreEqual, "Objects should be equal despite ignored property being different.");
+        }
 
         private static ComplexNonBuiltInWithEnumerablePropertyClass CreateComplexNonBuiltInWithEnumerablePropertyClass(int i)
         {

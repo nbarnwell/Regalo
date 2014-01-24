@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections;
-using System.Collections.Generic;
 using System.Linq;
-using System.Linq.Expressions;
 using System.Reflection;
 using ObjectCompare;
 
@@ -11,15 +9,14 @@ namespace Regalo.ObjectCompare
     public class ObjectComparer : IObjectComparer
     {
         private readonly IObjectComparerProvider _objectComparerProvider;
-        private readonly IList<PropertyInfo> _properties;
+        private readonly PropertyComparisonIgnoreList _ignores;
 
-        public ObjectComparer(Type type, IObjectComparerProvider objectComparerProvider)
+        public ObjectComparer(IObjectComparerProvider objectComparerProvider)
         {
-            if (type == null) throw new ArgumentNullException("type");
             if (objectComparerProvider == null) throw new ArgumentNullException("objectComparerProvider");
 
-            _properties = type.GetProperties(BindingFlags.Public | BindingFlags.Instance);
             _objectComparerProvider = objectComparerProvider;
+            _ignores = objectComparerProvider.GetIgnoreList();
         }
 
         public ObjectComparisonResult AreEqual(object object1, object object2)
@@ -36,6 +33,7 @@ namespace Regalo.ObjectCompare
 
             var object1Type = object1.GetType();
             var object2Type = object2.GetType();
+
             if (object1Type != object2Type)
             {
                 // Let the type check go if they're both at least enumerable
@@ -70,13 +68,21 @@ namespace Regalo.ObjectCompare
 
         private ObjectComparisonResult AreComplexObjectsEqual(object object1, object object2)
         {
-            if (false == _properties.Any())
+            var typeBeingCompared = object1.GetType();
+            var properties = typeBeingCompared.GetProperties(BindingFlags.Public | BindingFlags.Instance);
+
+            if (false == properties.Any())
             {
                 return ObjectComparisonResult.Success();
             }
 
-            foreach (var property in _properties)
+            foreach (var property in properties)
             {
+                if (_ignores.Contains(typeBeingCompared, property.Name))
+                {
+                    continue;
+                }
+
                 var value1 = property.GetValue(object1, null);
                 var value2 = property.GetValue(object2, null);
 
@@ -120,11 +126,6 @@ namespace Regalo.ObjectCompare
             }
 
             return ObjectComparisonResult.Success();
-        }
-
-        public ObjectComparer Ignore(Expression<Func<object, object>> ignore)
-        {
-            throw new NotImplementedException();
         }
     }
 }
