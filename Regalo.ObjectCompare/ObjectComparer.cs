@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Reflection;
 using ObjectCompare;
 
@@ -8,16 +9,7 @@ namespace Regalo.ObjectCompare
 {
     public class ObjectComparer : IObjectComparer
     {
-        private readonly IObjectComparerProvider _objectComparerProvider;
-        private readonly PropertyComparisonIgnoreList _ignores;
-
-        public ObjectComparer(IObjectComparerProvider objectComparerProvider)
-        {
-            if (objectComparerProvider == null) throw new ArgumentNullException("objectComparerProvider");
-
-            _objectComparerProvider = objectComparerProvider;
-            _ignores = objectComparerProvider.GetIgnoreList();
-        }
+        private readonly PropertyComparisonIgnoreList _ignores = new PropertyComparisonIgnoreList();
 
         public ObjectComparisonResult AreEqual(object object1, object object2)
         {
@@ -56,6 +48,12 @@ namespace Regalo.ObjectCompare
             return AreComplexObjectsEqual(object1, object2);
         }
 
+        public IObjectComparer Ignore<T, TProperty>(Expression<Func<T, TProperty>> ignore)
+        {
+            _ignores.Add(ignore);
+            return this;
+        }
+
         private static ObjectComparisonResult ArePrimitivesEqual(object value2, object value1)
         {
             if (!value2.Equals(value1))
@@ -86,8 +84,8 @@ namespace Regalo.ObjectCompare
                 var value1 = property.GetValue(object1, null);
                 var value2 = property.GetValue(object2, null);
 
-                var comparer = _objectComparerProvider.ComparerFor(property.PropertyType);
-                var result = comparer.AreEqual(value1, value2);
+                // NOTE: Recursion
+                var result = AreEqual(value1, value2);
 
                 if (!result.AreEqual)
                 {
@@ -105,12 +103,10 @@ namespace Regalo.ObjectCompare
 
             bool hasNext1 = enumerator1.MoveNext();
             bool hasNext2 = enumerator2.MoveNext();
-            var enumeratorType = enumerator1.Current.GetType();
 
             while (hasNext1 && hasNext2)
             {
-                var comparer = _objectComparerProvider.ComparerFor(enumeratorType);
-                var result = comparer.AreEqual(enumerator1.Current, enumerator2.Current);
+                var result = AreEqual(enumerator1.Current, enumerator2.Current);
                 if (!result.AreEqual)
                 {
                     return result;
