@@ -40,8 +40,9 @@ namespace Regalo.Testing
 
             var eventsStoredToEventStore = _context.GetGeneratedEvents();
 
-            var comparer = new ObjectComparer()
-                .Ignore<Event, Guid?>(x => x.ParentVersion);
+            var comparer = new ObjectComparer().Ignore<Event, Guid?>(x => x.ParentVersion)
+                                               .Ignore<Event, Guid>(x => x.Version)
+                                               .Ignore<Event, Guid>(x => x.Id);
 
             ObjectComparisonResult result = comparer.AreEqual(_expected, eventsStoredToEventStore);
             if (!result.AreEqual)
