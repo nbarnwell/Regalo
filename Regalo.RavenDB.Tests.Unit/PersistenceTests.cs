@@ -24,12 +24,12 @@ namespace Regalo.RavenDB.Tests.Unit
         [SetUp]
         public void SetUp()
         {
-            //_documentStore = new EmbeddableDocumentStore { RunInMemory = true };
-            _documentStore = new DocumentStore
-            {
-                Url = "http://localhost:8080/",
-                DefaultDatabase = "Regalo.RavenDB.Tests.UnitPersistenceTests"
-            };
+            _documentStore = new EmbeddableDocumentStore { RunInMemory = true };
+            //_documentStore = new DocumentStore
+            //{
+            //    Url = "http://localhost:8080/",
+            //    DefaultDatabase = "Regalo.RavenDB.Tests.UnitPersistenceTests"
+            //};
             _documentStore.Initialize();
 
             _versionHandlerMock = new Mock<IVersionHandler>();
