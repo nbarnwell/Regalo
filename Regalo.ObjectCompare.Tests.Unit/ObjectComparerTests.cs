@@ -152,6 +152,20 @@ namespace Regalo.ObjectCompare.Tests.Unit
             Assert.IsTrue(result.AreEqual, "Objects should be equal despite ignored property being different.");
         }
 
+        [Test]
+        public void ComparingObjectsWithCircularReferencesShouldNotFail()
+        {
+            var object1 = new NonBuiltInClassAllowingCircularReference();
+            object1.Inner = object1;
+
+            var object2 = new NonBuiltInClassAllowingCircularReference();
+            object2.Inner = object2;
+
+            var result = comparer.AreEqual(object1, object2);
+
+            Assert.IsTrue(result.AreEqual, "Objects should be equal and result returned despite circular reference.");
+        }
+
         private static ComplexNonBuiltInWithEnumerablePropertyClass CreateComplexNonBuiltInWithEnumerablePropertyClass(int i)
         {
             var object1 = new ComplexNonBuiltInWithEnumerablePropertyClass
@@ -193,5 +207,10 @@ namespace Regalo.ObjectCompare.Tests.Unit
     public class ComplexNonBuiltInClass
     {
         public NonBuiltInClass TheValue { get; set; }
+    }
+
+    public class NonBuiltInClassAllowingCircularReference
+    {
+        public NonBuiltInClassAllowingCircularReference Inner { get; set; }
     }
 }

@@ -11,6 +11,7 @@ namespace Regalo.ObjectCompare
     public class ObjectComparer : IObjectComparer
     {
         private readonly Stack<string> _propertyComparisonStack = new Stack<string>();
+        private readonly IList<object> _circularReferenceChecklist = new List<object>();
         private readonly PropertyComparisonIgnoreList _ignores = new PropertyComparisonIgnoreList();
 
         public ObjectComparisonResult AreEqual(object object1, object object2)
@@ -84,6 +85,14 @@ namespace Regalo.ObjectCompare
                     try
                     {
                         var value1 = property.GetValue(object1, null);
+
+                        if (_circularReferenceChecklist.Contains(value1))
+                        {
+                            return ObjectComparisonResult.Success();
+                        }
+
+                        _circularReferenceChecklist.Add(value1);
+
                         var value2 = property.GetValue(object2, null);
 
                         // NOTE: Recursion
