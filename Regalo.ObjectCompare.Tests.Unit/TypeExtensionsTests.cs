@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using NUnit.Framework;
 
-namespace ObjectCompare.Tests.Unit
+namespace Regalo.ObjectCompare.Tests.Unit
 {
     [TestFixture]
     public class TypeExtensionsTests

@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using NUnit.Framework;
 using Regalo.Core;
@@ -44,8 +46,13 @@ namespace Regalo.Testing
             ObjectComparisonResult result = comparer.AreEqual(_expected, eventsStoredToEventStore);
             if (!result.AreEqual)
             {
-                throw new AssertionException("Actual events did not match expected events. " + result.InequalityReason);
+                throw new AssertionException(string.Format("Actual events did not match expected events. {0}", result.InequalityReason));
             }
+        }
+
+        private static string FormatPropertyPath(IEnumerable<string> propertyChainDescription)
+        {
+            return string.Join(".", propertyChainDescription.Reverse());
         }
 
         private void InvokeHandler()

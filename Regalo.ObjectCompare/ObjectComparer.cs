@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using ObjectCompare;
 
 namespace Regalo.ObjectCompare
 {
@@ -20,6 +19,9 @@ namespace Regalo.ObjectCompare
             {
                 return ObjectComparisonResult.Success();
             }
+
+            var type = (object1 ?? object2).GetType();
+            if (_propertyComparisonStack.Count == 0) _propertyComparisonStack.Push(type.Name);
 
             if ((object1 == null) != (object2 == null))
             {

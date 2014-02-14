@@ -2,7 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 
-namespace ObjectCompare
+namespace Regalo.ObjectCompare
 {
     public static class TypeExtensions
     {
@@ -29,7 +29,7 @@ namespace ObjectCompare
 
         public static bool IsPrimitive(this Type type)
         {
-            return __primitives.Contains(type.TypeHandle);
+            return type.IsValueType || __primitives.Contains(type.TypeHandle);
         }
 
         public static bool IsEnumerable(this Type type)

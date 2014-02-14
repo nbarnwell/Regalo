@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 
 namespace Regalo.ObjectCompare
 {
@@ -8,30 +9,34 @@ namespace Regalo.ObjectCompare
 
         public bool                AreEqual                 { get; private set; }
         public string              InequalityReason         { get; private set; }
-        public IEnumerable<string> PropertyChainDescription { get; private set; }
 
-        private ObjectComparisonResult(bool areEqual, string inequalityReason, IEnumerable<string> propertyChainDescription)
+        private ObjectComparisonResult(bool areEqual, string inequalityReason)
         {
             AreEqual                 = areEqual;
             InequalityReason         = inequalityReason;
-            PropertyChainDescription = propertyChainDescription;
         }
 
         public static ObjectComparisonResult Success()
         {
-            return new ObjectComparisonResult(true, "", null);
+            return new ObjectComparisonResult(true, "");
         }
 
         public static ObjectComparisonResult Fail(IEnumerable<string> propertyChainDescription, string reasonFormat, params object[] reasonArgs)
         {
             var inequalityReason = string.Format(reasonFormat, reasonArgs);
+            var message = string.Format("{0}\r\n   at {1}", inequalityReason, FormatPropertyChainDescription(propertyChainDescription));
 
             if (ThrowOnFail)
             {
-                throw new ObjectComparisonException(inequalityReason, propertyChainDescription);
+                throw new ObjectComparisonException(message);
             }
 
-            return new ObjectComparisonResult(false, inequalityReason, propertyChainDescription);
+            return new ObjectComparisonResult(false, message);
+        }
+
+        private static string FormatPropertyChainDescription(IEnumerable<string> propertyChainDescription)
+        {
+            return string.Join(".", propertyChainDescription.Reverse());
         }
     }
 }
