@@ -26,5 +26,10 @@ namespace Regalo.Testing
             var expected = func.Invoke(_entity, _command);
             return new ScenarioAssert<TEntity, THandler, TCommand>(_entity, _handler, _command, _context, expected);
         }
+
+        public IScenarioExceptionAssert<TException, TEntity, THandler, TCommand> Throws<TException>() where TException : Exception
+        {
+            return new ScenarioExceptionAssert<TException, TEntity, THandler, TCommand>(_handler, _command);
+        }
     }
 }

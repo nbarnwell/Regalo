@@ -39,6 +39,8 @@ namespace Regalo.Testing.Tests.Unit
         public void TearDown()
         {
             ObjectComparisonResult.ThrowOnFail = false;
+
+            Resolver.ClearResolvers();
         }
 
         [Test]
@@ -49,6 +51,17 @@ namespace Regalo.Testing.Tests.Unit
                     .Given(SalesOrderTestDataBuilder.NewOrder().WithSingleLineItem())
                     .When(c => new PlaceSalesOrder(c.Id))
                     .Then((a, c) => new[] { new SalesOrderPlaced(a.Id) })
+                    .Assert();
+        }
+
+        [Test]
+        public void GivenSalesOrderWithNoLines_WhenPlacingOrder_ThenShouldThrow()
+        {
+            Scenario.For(Context)
+                    .HandledBy(CreateHandler())
+                    .Given(SalesOrderTestDataBuilder.NewOrder())
+                    .When(order => new PlaceSalesOrder(order.Id))
+                    .Throws<InvalidOperationException>()
                     .Assert();
         }
 

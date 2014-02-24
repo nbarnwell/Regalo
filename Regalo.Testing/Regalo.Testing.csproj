@@ -53,6 +53,7 @@
     <Compile Include="IGivenSetter.cs" />
     <Compile Include="IHandlerSetter.cs" />
     <Compile Include="IScenarioAssert.cs" />
+    <Compile Include="IScenarioExceptionAssert.cs" />
     <Compile Include="ITestDataBuilder.cs" />
     <Compile Include="IThenSetter.cs" />
     <Compile Include="IWhenSetter.cs" />
@@ -61,6 +62,8 @@
     <Compile Include="Properties\AssemblyInfo.Version.cs" />
     <Compile Include="Scenario.cs" />
     <Compile Include="ScenarioAssert.cs" />
+    <Compile Include="ScenarioAssertBase.cs" />
+    <Compile Include="ScenarioExceptionAssert.cs" />
     <Compile Include="ScenarioGivenSetter.cs" />
     <Compile Include="ScenarioHandlerSetter.cs" />
     <Compile Include="ScenarioThenSetter.cs" />
