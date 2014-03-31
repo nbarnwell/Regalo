@@ -43,7 +43,9 @@ namespace Regalo.Core.Tests.Unit
                 typeof(IEventHandler<object>),
                 typeof(IEventHandler<SimpleEventBase>),
                 typeof(IEventHandler<SimpleEvent>),
-                typeof(IEventHandler<EventHandlingSucceededEvent<SimpleEvent>>),
+                typeof(IEventHandler<IEventHandlingSucceededEvent<object>>),
+                typeof(IEventHandler<IEventHandlingSucceededEvent<SimpleEventBase>>),
+                typeof(IEventHandler<IEventHandlingSucceededEvent<SimpleEvent>>)
             };
 
             var result = new List<Type>();
@@ -111,7 +113,7 @@ namespace Regalo.Core.Tests.Unit
                 new[]
                 {
                     typeof(SimpleEvent),
-                    typeof(EventHandlingFailedEvent<SimpleEvent>)
+                    typeof(IEventHandlingFailedEvent<SimpleEvent>)
                 },
                 failingEventHandler.TargetsCalled);
         }
@@ -176,7 +178,7 @@ namespace Regalo.Core.Tests.Unit
         }
     }
 
-    public class FailingEventHandler : IEventHandler<SimpleEvent>, IEventHandler<EventHandlingFailedEvent<SimpleEvent>>
+    public class FailingEventHandler : IEventHandler<SimpleEvent>, IEventHandler<IEventHandlingFailedEvent<SimpleEvent>>
     {
         public readonly IList<Type> TargetsCalled = new List<Type>();
         public readonly IList<Type> MessageTypes = new List<Type>();
@@ -189,9 +191,9 @@ namespace Regalo.Core.Tests.Unit
             throw new Exception("Deliberate failure.");
         }
 
-        public void Handle(EventHandlingFailedEvent<SimpleEvent> evt)
+        public void Handle(IEventHandlingFailedEvent<SimpleEvent> evt)
         {
-            TargetsCalled.Add(typeof(EventHandlingFailedEvent<SimpleEvent>));
+            TargetsCalled.Add(typeof(IEventHandlingFailedEvent<SimpleEvent>));
             MessageTypes.Add(evt.GetType());
         }
     }
