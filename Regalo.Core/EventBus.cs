@@ -36,6 +36,7 @@ namespace Regalo.Core
                 {
                     _logger.Error(this, e, "Failed to handle {0} but NOT publishing EventHandlingFailedEvent<object>...", evt);
                 }
+                return;
             }
 
             if (eventType != typeof(object))
