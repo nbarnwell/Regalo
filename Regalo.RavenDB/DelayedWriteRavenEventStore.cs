@@ -9,18 +9,18 @@ using Regalo.Core.EventSourcing;
 
 namespace Regalo.RavenDB
 {
-    [Obsolete("Use DelayedWriteRavenEventStore instead, for improved performance from Preload and save characteristics.")]
-    public class RavenEventStore : IEventStore
+    public class DelayedWriteRavenEventStore : IDelayedWriteEventStore, IEventStoreWithPreloading, IDisposable
     {
-        private readonly IDocumentStore _documentStore;
         private readonly IVersionHandler _versionHandler;
 
-        public RavenEventStore(IDocumentStore documentStore, IVersionHandler versionHandler)
+        private IDocumentSession _documentSession;
+
+        public DelayedWriteRavenEventStore(IDocumentStore documentStore, IVersionHandler versionHandler)
         {
             if (documentStore == null) throw new ArgumentNullException("documentStore");
             if (versionHandler == null) throw new ArgumentNullException("versionHandler");
 
-            _documentStore = documentStore;
+            _documentSession = documentStore.OpenSession();
             _versionHandler = versionHandler;
         }
 
@@ -31,27 +31,27 @@ namespace Regalo.RavenDB
 
         public void Store(Guid aggregateId, IEnumerable<object> events)
         {
-            using (var session = _documentStore.OpenSession())
+            var aggregateIdAsString = aggregateId.ToString();
+
+            var stream = _documentSession.Load<EventStream>(aggregateIdAsString);
+
+            if (stream == null)
             {
-                var aggregateIdAsString = aggregateId.ToString();
+                stream = new EventStream(aggregateIdAsString);
+                stream.Append(events);
+                _documentSession.Store(stream);
 
-                var stream = session.Load<EventStream>(aggregateIdAsString);
-
-                if (stream == null)
-                {
-                    stream = new EventStream(aggregateIdAsString);
-                    stream.Append(events);
-                    session.Store(stream);
-
-                    SetRavenCollectionName(events, session, stream);
-                }
-                else
-                {
-                    stream.Append(events);
-                }
-
-                session.SaveChanges();
+                SetRavenCollectionName(events, _documentSession, stream);
             }
+            else
+            {
+                stream.Append(events);
+            }
+        }
+
+        public void Flush()
+        {
+            _documentSession.SaveChanges();
         }
 
         private static void SetRavenCollectionName(IEnumerable<object> events, IDocumentSession session, EventStream stream)
@@ -64,23 +64,26 @@ namespace Regalo.RavenDB
             }
         }
 
+        public void Preload(IEnumerable<Guid> aggregateIds)
+        {
+            var idValues = aggregateIds.Select(x => x.ToString());
+            _documentSession.Load<EventStream>(idValues);
+        }
+
         public IEnumerable<object> Load(Guid aggregateId)
         {
-            using (var session = _documentStore.OpenSession())
+            var aggregateIdAsString = aggregateId.ToString();
+
+            var stream = _documentSession.Load<EventStream>(aggregateIdAsString);
+
+            if (stream != null)
             {
-                var aggregateIdAsString = aggregateId.ToString();
+                var events = stream.Events;
 
-                var stream = session.Load<EventStream>(aggregateIdAsString);
-
-                if (stream != null)
-                {
-                    var events = stream.Events;
-
-                    return events.Any() ? events : Enumerable.Empty<object>();
-                }
-
-                return Enumerable.Empty<object>();
+                return events.Any() ? events : Enumerable.Empty<object>();
             }
+
+            return Enumerable.Empty<object>();
         }
 
         public IEnumerable<object> Load(Guid aggregateId, Guid maxVersion)
@@ -107,6 +110,17 @@ namespace Regalo.RavenDB
                 var eventVersion = _versionHandler.GetVersion(evt);
                 if (eventVersion == maxVersion) break;
             }
+        }
+
+        public void Dispose()
+        {
+            if (_documentSession != null)
+            {
+                _documentSession.Dispose();
+                _documentSession = null;
+            }
+
+            GC.SuppressFinalize(this);
         }
     }
 }
