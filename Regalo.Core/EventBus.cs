@@ -24,6 +24,12 @@ namespace Regalo.Core
             }
             catch (Exception e)
             {
+                if (IsRetryableException(evt, e))
+                {
+                    _logger.Error(this, e, "Failed to handle {0}, allowing retryable exception to propagate...");
+                    throw;
+                }
+
                 if (eventType != typeof(object))
                 {
                     var failedEvent = EventHandlingFailedEvent.Create(evt, e);
@@ -55,6 +61,12 @@ namespace Regalo.Core
             {
                 Publish(evt);
             }
+        }
+
+        private static bool IsRetryableException(object evt, Exception exception)
+        {
+            var filter = Conventions.RetryableEventPublishingExceptionFilter;
+            return filter != null && filter(evt, exception);
         }
     }
 }

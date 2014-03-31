@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
+
 using NUnit.Framework;
 using Regalo.Core;
 using Regalo.Testing;
@@ -21,6 +23,7 @@ namespace Regalo.Core.Tests.Unit
             _eventHandlerA = new EventHandlerA();
             _eventHandlerB = new EventHandlerB();
             Resolver.SetResolvers(type => null, LocateAllEventHandlers);
+            Conventions.SetRetryableEventHandlingExceptionFilter(null);
         }
 
         private IEnumerable<object> LocateAllEventHandlers(Type type)
@@ -114,6 +117,28 @@ namespace Regalo.Core.Tests.Unit
                 {
                     typeof(SimpleEvent),
                     typeof(IEventHandlingFailedEvent<SimpleEvent>)
+                },
+                failingEventHandler.TargetsCalled);
+        }
+
+        [Test]
+        public void GivenAMessageThatWillFailHandling_WhenAskedToPublish_ShouldAllowRetryableExceptionsToPropagate()
+        {
+            Conventions.SetRetryableEventHandlingExceptionFilter((o, e) => true);
+            var eventBus = new EventBus(new NullLogger());
+            var failingEventHandler = new FailingEventHandler();
+            Resolver.ClearResolvers();
+            Resolver.SetResolvers(
+                type => null,
+                type => new object[] { failingEventHandler }.Where(x => type.IsAssignableFrom(x.GetType())));
+
+            var eventThatWillFailToBeHandled = new SimpleEvent();
+            Assert.Throws<TargetInvocationException>(() => eventBus.Publish(eventThatWillFailToBeHandled));
+
+            CollectionAssert.AreEqual(
+                new[]
+                {
+                    typeof(SimpleEvent)
                 },
                 failingEventHandler.TargetsCalled);
         }
