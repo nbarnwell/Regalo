@@ -64,6 +64,8 @@
     <Compile Include="IdNotSetException.cs" />
     <Compile Include="IEventBus.cs" />
     <Compile Include="IEventHandler.cs" />
+    <Compile Include="IEventHandlingFailedEvent.cs" />
+    <Compile Include="IEventHandlingSucceededEvent.cs" />
     <Compile Include="ILogger.cs" />
     <Compile Include="IMessageHandlerContext.cs" />
     <Compile Include="IRepository.cs" />

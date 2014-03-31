@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
+
 using NUnit.Framework;
 using Regalo.Core;
 using Regalo.Testing;
@@ -21,6 +23,7 @@ namespace Regalo.Core.Tests.Unit
             _eventHandlerA = new EventHandlerA();
             _eventHandlerB = new EventHandlerB();
             Resolver.SetResolvers(type => null, LocateAllEventHandlers);
+            Conventions.SetRetryableEventHandlingExceptionFilter(null);
         }
 
         private IEnumerable<object> LocateAllEventHandlers(Type type)
@@ -43,7 +46,9 @@ namespace Regalo.Core.Tests.Unit
                 typeof(IEventHandler<object>),
                 typeof(IEventHandler<SimpleEventBase>),
                 typeof(IEventHandler<SimpleEvent>),
-                typeof(IEventHandler<EventHandlingSucceededEvent<SimpleEvent>>),
+                typeof(IEventHandler<IEventHandlingSucceededEvent<object>>),
+                typeof(IEventHandler<IEventHandlingSucceededEvent<SimpleEventBase>>),
+                typeof(IEventHandler<IEventHandlingSucceededEvent<SimpleEvent>>)
             };
 
             var result = new List<Type>();
@@ -111,7 +116,29 @@ namespace Regalo.Core.Tests.Unit
                 new[]
                 {
                     typeof(SimpleEvent),
-                    typeof(EventHandlingFailedEvent<SimpleEvent>)
+                    typeof(IEventHandlingFailedEvent<SimpleEvent>)
+                },
+                failingEventHandler.TargetsCalled);
+        }
+
+        [Test]
+        public void GivenAMessageThatWillFailHandling_WhenAskedToPublish_ShouldAllowRetryableExceptionsToPropagate()
+        {
+            Conventions.SetRetryableEventHandlingExceptionFilter((o, e) => true);
+            var eventBus = new EventBus(new NullLogger());
+            var failingEventHandler = new FailingEventHandler();
+            Resolver.ClearResolvers();
+            Resolver.SetResolvers(
+                type => null,
+                type => new object[] { failingEventHandler }.Where(x => type.IsAssignableFrom(x.GetType())));
+
+            var eventThatWillFailToBeHandled = new SimpleEvent();
+            Assert.Throws<TargetInvocationException>(() => eventBus.Publish(eventThatWillFailToBeHandled));
+
+            CollectionAssert.AreEqual(
+                new[]
+                {
+                    typeof(SimpleEvent)
                 },
                 failingEventHandler.TargetsCalled);
         }
@@ -176,7 +203,7 @@ namespace Regalo.Core.Tests.Unit
         }
     }
 
-    public class FailingEventHandler : IEventHandler<SimpleEvent>, IEventHandler<EventHandlingFailedEvent<SimpleEvent>>
+    public class FailingEventHandler : IEventHandler<SimpleEvent>, IEventHandler<IEventHandlingFailedEvent<SimpleEvent>>
     {
         public readonly IList<Type> TargetsCalled = new List<Type>();
         public readonly IList<Type> MessageTypes = new List<Type>();
@@ -189,9 +216,9 @@ namespace Regalo.Core.Tests.Unit
             throw new Exception("Deliberate failure.");
         }
 
-        public void Handle(EventHandlingFailedEvent<SimpleEvent> evt)
+        public void Handle(IEventHandlingFailedEvent<SimpleEvent> evt)
         {
-            TargetsCalled.Add(typeof(EventHandlingFailedEvent<SimpleEvent>));
+            TargetsCalled.Add(typeof(IEventHandlingFailedEvent<SimpleEvent>));
             MessageTypes.Add(evt.GetType());
         }
     }

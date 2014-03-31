@@ -45,11 +45,10 @@ namespace Regalo.Core
         private List<HandlerDescriptor> GetHandlerDescriptors(Type messageHandlerOpenType, Type messageType)
         {
             var isEventHandlingResultEvent = IsEventHandlingResultEvent(messageType);
-            var inspector = new TypeInspector();
 
             var messageTypes = isEventHandlingResultEvent
-                                   ? new[] { messageType }
-                                   : inspector.GetTypeHierarchy(messageType);
+                                   ? GetEventHandlingResultEventTypeHierarchy(messageType)
+                                   : GetEventTypeHierarchy(messageType);
 
             var targets = messageTypes.Select(x => new { MessageType = x, HandlerType = messageHandlerOpenType.MakeGenericType(x) })
                                       .SelectMany(
@@ -61,6 +60,24 @@ namespace Regalo.Core
                                           })
                                       .ToList();
             return targets;
+        }
+
+        private static IEnumerable<Type> GetEventTypeHierarchy(Type eventType)
+        {
+            var inspector = new TypeInspector();
+            return inspector.GetTypeHierarchy(eventType);
+        }
+
+        private static IEnumerable<Type> GetEventHandlingResultEventTypeHierarchy(Type type)
+        {
+            var expectedOpenGenericTypes = new[] { typeof(IEventHandlingSucceededEvent<>), typeof(IEventHandlingFailedEvent<>) };
+            var closedGenericType = type.GetInterfaces().Where(i => i.IsGenericType)
+                                                        .First(i => expectedOpenGenericTypes.Contains(i.GetGenericTypeDefinition()));
+            var openGenericType = closedGenericType.GetGenericTypeDefinition();
+            var eventType = closedGenericType.GetGenericArguments().Single();
+
+            var eventTypes = GetEventTypeHierarchy(eventType);
+            return eventTypes.Select(t => openGenericType.MakeGenericType(t));
         }
 
         private MethodInfo FindHandleMethod(Type messageType, Type handlerType)

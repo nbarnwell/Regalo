@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
 
 namespace Regalo.Core
 {
@@ -26,9 +24,15 @@ namespace Regalo.Core
             }
             catch (Exception e)
             {
+                if (IsRetryableException(evt, e))
+                {
+                    _logger.Error(this, e, "Failed to handle {0}, allowing retryable exception to propagate...");
+                    throw;
+                }
+
                 if (eventType != typeof(object))
                 {
-                    var failedEvent = MakeFailureEvent(evt, e);
+                    var failedEvent = EventHandlingFailedEvent.Create(evt, e);
                     _logger.Error(this, e, "Failed to handle {0}, publishing {1}...", evt, failedEvent);
                     HandleMessage(failedEvent, typeof(IEventHandler<>));
                 }
@@ -36,11 +40,12 @@ namespace Regalo.Core
                 {
                     _logger.Error(this, e, "Failed to handle {0} but NOT publishing EventHandlingFailedEvent<object>...", evt);
                 }
+                return;
             }
 
             if (eventType != typeof(object))
             {
-                var succeededEvent = MakeSuccessEvent(evt);
+                var succeededEvent = EventHandlingSucceededEvent.Create(evt);
                 _logger.Debug(this, "Handled {0}, publishing {1}...", evt, succeededEvent);
                 HandleMessage(succeededEvent, typeof(IEventHandler<>));
             }
@@ -58,23 +63,10 @@ namespace Regalo.Core
             }
         }
 
-        private static object MakeSuccessEvent(object evt)
+        private static bool IsRetryableException(object evt, Exception exception)
         {
-            return WrapEvent(evt, typeof(EventHandlingSucceededEvent<>));
-        }
-
-        private static object MakeFailureEvent(object evt, Exception e)
-        {
-            return WrapEvent(evt, typeof(EventHandlingFailedEvent<>), e);
-        }
-
-        private static object WrapEvent(object evt, Type wrapperEventOpenType, params object[] additionalArguments)
-        {
-            var eventType = evt.GetType();
-            var wrapperEventTypeClosedType = wrapperEventOpenType.MakeGenericType(eventType);
-            var arguments = new[] { evt }.Concat(additionalArguments).ToArray();
-            var wrapperEvent = Activator.CreateInstance(wrapperEventTypeClosedType, arguments);
-            return wrapperEvent;
+            var filter = Conventions.RetryableEventPublishingExceptionFilter;
+            return filter != null && filter(evt, exception);
         }
     }
 }
