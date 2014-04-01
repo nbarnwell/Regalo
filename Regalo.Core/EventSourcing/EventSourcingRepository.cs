@@ -8,6 +8,7 @@ namespace Regalo.Core.EventSourcing
     {
         private readonly IEventStore _eventStore;
         private readonly IConcurrencyMonitor _concurrencyMonitor;
+        private readonly ISet<Guid> _loaded = new HashSet<Guid>();
 
         public EventSourcingRepository(IEventStore eventStore, IConcurrencyMonitor concurrencyMonitor)
         {
@@ -40,6 +41,8 @@ namespace Regalo.Core.EventSourcing
 
             aggregateRoot.ApplyAll(events);
 
+            _loaded.Add(aggregateRoot.Id);
+
             return aggregateRoot;
         }
 
@@ -49,15 +52,24 @@ namespace Regalo.Core.EventSourcing
 
             if (uncommittedEvents.Length == 0) return;
 
-            object[] baseAndUnseenEvents = _eventStore.Load(item.Id).ToArray();
-
-            if (baseAndUnseenEvents.Length > 0)
+            if (_loaded.Contains(item.Id))
             {
-                var unseenEvents = GetUnseenEvents(item, baseAndUnseenEvents);
-                _concurrencyMonitor.CheckForConflicts(unseenEvents, uncommittedEvents);
+                object[] baseAndUnseenEvents = _eventStore.Load(item.Id).ToArray();
+
+                if (baseAndUnseenEvents.Length > 0)
+                {
+                    var unseenEvents = GetUnseenEvents(item, baseAndUnseenEvents);
+                    _concurrencyMonitor.CheckForConflicts(unseenEvents, uncommittedEvents);
+                }
+
+                _eventStore.Update(item.Id, uncommittedEvents);
+            }
+            else
+            {
+                _eventStore.Add(item.Id, uncommittedEvents);
+                _loaded.Add(item.Id);
             }
 
-            _eventStore.Store(item.Id, uncommittedEvents);
             item.AcceptUncommittedEvents();
         }
 

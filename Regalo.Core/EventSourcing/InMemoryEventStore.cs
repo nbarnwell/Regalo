@@ -24,13 +24,18 @@ namespace Regalo.Core.EventSourcing
             }
         }
 
-        public void Store(Guid aggregateId, object evt)
+        public void Add(Guid aggregateId, IEnumerable<object> events)
+        {
+            Update(aggregateId, events);
+        }
+
+        public void Update(Guid aggregateId, object evt)
         {
             IList<object> aggregateEventList = GetAggregateEventList(aggregateId);
             aggregateEventList.Add(evt);
         }
 
-        public void Store(Guid aggregateId, IEnumerable<object> events)
+        public void Update(Guid aggregateId, IEnumerable<object> events)
         {
             IList<object> aggregateEventList = GetAggregateEventList(aggregateId);
             foreach (var evt in events)

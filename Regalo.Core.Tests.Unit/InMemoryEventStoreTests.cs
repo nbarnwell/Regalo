@@ -45,7 +45,7 @@ namespace Regalo.Core.Tests.Unit
             var userRegistered = new UserRegistered(userId);
 
             // Act
-            store.Store(userId, userRegistered);
+            store.Update(userId, new[] { userRegistered });
 
             // Assert
             CollectionAssert.IsNotEmpty(((InMemoryEventStore)store).Events);
@@ -62,7 +62,7 @@ namespace Regalo.Core.Tests.Unit
             user.ChangePassword("newpassword");
 
             // Act
-            store.Store(user.Id, user.GetUncommittedEvents());
+            store.Update(user.Id, user.GetUncommittedEvents());
 
             // Assert
             CollectionAssert.IsNotEmpty(((InMemoryEventStore)store).Events);
@@ -85,8 +85,8 @@ namespace Regalo.Core.Tests.Unit
             user2.ChangePassword("user2pwd1");
             user2.ChangePassword("user2pwd2");
 
-            store.Store(user1.Id, user1.GetUncommittedEvents());
-            store.Store(user2.Id, user2.GetUncommittedEvents());
+            store.Update(user1.Id, user1.GetUncommittedEvents());
+            store.Update(user2.Id, user2.GetUncommittedEvents());
 
             // Act
             IEnumerable<object> eventsForUser1 = store.Load(user1.Id);
@@ -109,7 +109,7 @@ namespace Regalo.Core.Tests.Unit
                                     new UserChangedPassword("pwd3"), // v4
                                     new UserChangedPassword("pwd4"), // v5
                                 };
-            store.Store(id, allEvents);
+            store.Update(id, allEvents);
 
             // Act
             IEnumerable<object> version3 = store.Load(id, ((Event)allEvents[2]).Version);

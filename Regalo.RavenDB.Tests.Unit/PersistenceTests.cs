@@ -60,7 +60,7 @@ namespace Regalo.RavenDB.Tests.Unit
         {
             // Arrange
             var versionHandlerMock = new Mock<IVersionHandler>();
-            IEventStore store = new RavenEventStore(_documentStore, versionHandlerMock.Object);
+            IEventStore store = new DelayedWriteRavenEventStore(_documentStore, versionHandlerMock.Object);
 
             // Act
             IEnumerable<object> events = store.Load(Guid.NewGuid());
@@ -74,12 +74,12 @@ namespace Regalo.RavenDB.Tests.Unit
         {
             // Arrange
             var versionHandlerMock = new Mock<IVersionHandler>();
-            IEventStore store = new RavenEventStore(_documentStore, versionHandlerMock.Object);
+            IEventStore store = new DelayedWriteRavenEventStore(_documentStore, versionHandlerMock.Object);
 
             // Act
             var id = Guid.NewGuid();
             var evt = new CustomerSignedUp(id);
-            store.Store(id, evt);
+            store.Add(id, new[] { evt });
             var events = store.Load(id);
 
             // Assert
@@ -95,7 +95,7 @@ namespace Regalo.RavenDB.Tests.Unit
         {
             // Arrange
             var versionHandlerMock = new Mock<IVersionHandler>();
-            IEventStore store = new RavenEventStore(_documentStore, versionHandlerMock.Object);
+            IEventStore store = new DelayedWriteRavenEventStore(_documentStore, versionHandlerMock.Object);
 
             var customer = new Customer();
             customer.Signup();
@@ -106,7 +106,7 @@ namespace Regalo.RavenDB.Tests.Unit
 
             customer.AssignAccountManager(accountManager.Id, startDate);
 
-            store.Store(customer.Id, customer.GetUncommittedEvents());
+            store.Add(customer.Id, customer.GetUncommittedEvents());
 
             // Act
             var acctMgrAssignedEvent = (AssignedAccountManager)store.Load(customer.Id).LastOrDefault();
@@ -120,12 +120,12 @@ namespace Regalo.RavenDB.Tests.Unit
         public void Saving_GivenEvents_ShouldAllowReloading()
         {
             // Arrange
-            IEventStore store = new RavenEventStore(_documentStore, _versionHandlerMock.Object);
+            IEventStore store = new DelayedWriteRavenEventStore(_documentStore, _versionHandlerMock.Object);
 
             // Act
             var customer = new Customer();
             customer.Signup();
-            store.Store(customer.Id, customer.GetUncommittedEvents());
+            store.Add(customer.Id, customer.GetUncommittedEvents());
             var events = store.Load(customer.Id);
 
             // Assert
@@ -139,11 +139,11 @@ namespace Regalo.RavenDB.Tests.Unit
         {
             // Arrange
             var versionHandlerMock = new Mock<IVersionHandler>();
-            IEventStore store = new RavenEventStore(_documentStore, versionHandlerMock.Object);
+            IEventStore store = new DelayedWriteRavenEventStore(_documentStore, versionHandlerMock.Object);
 
             // Act
             var id = Guid.NewGuid();
-            store.Store(id, Enumerable.Empty<object>());
+            store.Add(id, Enumerable.Empty<object>());
             var events = store.Load(id);
 
             // Assert
@@ -154,7 +154,7 @@ namespace Regalo.RavenDB.Tests.Unit
         public void GivenAggregateWithMultipleEvents_WhenLoadingSpecificVersion_ThenShouldOnlyReturnRequestedEvents()
         {
             // Arrange
-            IEventStore store = new RavenEventStore(_documentStore, _versionHandlerMock.Object);
+            IEventStore store = new DelayedWriteRavenEventStore(_documentStore, _versionHandlerMock.Object);
             var customerId = Guid.NewGuid();
             var storedEvents = new object[]
                               {
@@ -162,7 +162,7 @@ namespace Regalo.RavenDB.Tests.Unit
                                   new SubscribedToNewsletter("latest"), 
                                   new SubscribedToNewsletter("top")
                               };
-            store.Store(customerId, storedEvents);
+            store.Add(customerId, storedEvents);
             
             // Act
             var events = store.Load(customerId, ((Event)storedEvents[1]).Version);
@@ -175,7 +175,7 @@ namespace Regalo.RavenDB.Tests.Unit
         public void GivenAggregateWithMultipleEvents_WhenLoadingSpecificVersionThatNoEventHas_ThenShouldFail()
         {
             // Arrange
-            IEventStore store = new RavenEventStore(_documentStore, _versionHandlerMock.Object);
+            IEventStore store = new DelayedWriteRavenEventStore(_documentStore, _versionHandlerMock.Object);
             var customerId = Guid.NewGuid();
             var storedEvents = new object[]
                               {
@@ -183,7 +183,7 @@ namespace Regalo.RavenDB.Tests.Unit
                                   new SubscribedToNewsletter("latest"), 
                                   new SubscribedToNewsletter("top")
                               };
-            store.Store(customerId, storedEvents);
+            store.Add(customerId, storedEvents);
 
             // Act / Assert
             Assert.Throws<ArgumentOutOfRangeException>(() => store.Load(customerId, Guid.Parse("00000000-0000-0000-0000-000000000001")));
@@ -192,27 +192,31 @@ namespace Regalo.RavenDB.Tests.Unit
         [Test]
         public void Saving_GivenEventMappedToAggregateType_ThenShouldSetRavenCollectionName()
         {
-            IEventStore store = new RavenEventStore(_documentStore, _versionHandlerMock.Object);
-
-            Conventions.SetFindAggregateTypeForEventType(
-                type =>
-                {
-                    if (type == typeof(CustomerSignedUp))
-                    {
-                        return typeof(Customer);
-                    }
-
-                    return typeof(EventStream);
-                });
-
             var customerId = Guid.NewGuid();
-            var storedEvents = new object[]
-                              {
-                                  new CustomerSignedUp(customerId), 
-                                  new SubscribedToNewsletter("latest"), 
-                                  new SubscribedToNewsletter("top")
-                              };
-            store.Store(customerId, storedEvents);
+            
+            using (var eventStore = new DelayedWriteRavenEventStore(_documentStore, _versionHandlerMock.Object))
+            {
+                Conventions.SetFindAggregateTypeForEventType(
+                    type =>
+                    {
+                        if (type == typeof(CustomerSignedUp))
+                        {
+                            return typeof(Customer);
+                        }
+
+                        return typeof(EventStream);
+                    });
+
+                var storedEvents = new object[]
+                {
+                    new CustomerSignedUp(customerId),
+                    new SubscribedToNewsletter("latest"),
+                    new SubscribedToNewsletter("top")
+                };
+
+                eventStore.Add(customerId, storedEvents);
+                eventStore.Flush();
+            }
 
             using (var session = _documentStore.OpenSession())
             {

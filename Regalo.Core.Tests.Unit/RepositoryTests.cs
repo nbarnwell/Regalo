@@ -52,7 +52,7 @@ namespace Regalo.Core.Tests.Unit
             // Arrange
             var eventStore = new InMemoryEventStore();
             var userId = Guid.NewGuid();
-            eventStore.Store(
+            eventStore.Update(
                 userId,
                 new object[]
                 {
@@ -81,7 +81,7 @@ namespace Regalo.Core.Tests.Unit
                 new UserChangedPassword("newpassword"), 
                 new UserChangedPassword("newnewpassword")
             };
-            eventStore.Store(userId, events);
+            eventStore.Update(userId, events);
             var repository = new EventSourcingRepository<User>(eventStore, new Mock<IConcurrencyMonitor>().Object);
 
             // Act
@@ -113,7 +113,7 @@ namespace Regalo.Core.Tests.Unit
             var eventStore = new InMemoryEventStore();
             var userId = Guid.NewGuid();
             var latestVersion = Guid.NewGuid();
-            eventStore.Store(
+            eventStore.Update(
                 userId,
                 new object[]
                 {
@@ -167,14 +167,14 @@ namespace Regalo.Core.Tests.Unit
             // Arrange
             var userId = Guid.NewGuid();
             var eventStore = new InMemoryEventStore();
-            eventStore.Store(userId, new UserRegistered(userId));
+            eventStore.Update(userId, new UserRegistered(userId));
 
             var concurrencyMonitor = new Mock<IConcurrencyMonitor>();
             var repository = new EventSourcingRepository<User>(eventStore, concurrencyMonitor.Object);
             var user = repository.Get(userId);
 
             // Now another user changes the password before we get chance to save our changes:
-            eventStore.Store(userId, new UserChangedPassword("adifferentpassword"));
+            eventStore.Update(userId, new UserChangedPassword("adifferentpassword"));
 
             user.ChangePassword("newpassword");
 
@@ -198,7 +198,7 @@ namespace Regalo.Core.Tests.Unit
             var userId = Guid.NewGuid();
             var eventStore = new InMemoryEventStore();
             var userRegistered = new UserRegistered(userId);
-            eventStore.Store(userId, userRegistered);
+            eventStore.Update(userId, userRegistered);
 
             var repository = new EventSourcingRepository<User>(eventStore, new Mock<IConcurrencyMonitor>().Object);
             var user = repository.Get(userId);

@@ -24,12 +24,16 @@ namespace Regalo.RavenDB
             _versionHandler = versionHandler;
         }
 
-        public void Store(Guid aggregateId, object evt)
+        public void Add(Guid aggregateId, IEnumerable<object> events)
         {
-            Store(aggregateId, new[] { evt });
+            var stream = new EventStream(aggregateId.ToString());
+            stream.Append(events);
+            _documentSession.Store(stream);
+
+            SetRavenCollectionName(events, _documentSession, stream);
         }
 
-        public void Store(Guid aggregateId, IEnumerable<object> events)
+        public void Update(Guid aggregateId, IEnumerable<object> events)
         {
             var aggregateIdAsString = aggregateId.ToString();
 
@@ -37,16 +41,10 @@ namespace Regalo.RavenDB
 
             if (stream == null)
             {
-                stream = new EventStream(aggregateIdAsString);
-                stream.Append(events);
-                _documentSession.Store(stream);
+                throw new InvalidOperationException("You cannot update an aggregate that has not been saved.");
+            }
 
-                SetRavenCollectionName(events, _documentSession, stream);
-            }
-            else
-            {
-                stream.Append(events);
-            }
+            stream.Append(events);
         }
 
         public void Flush()
@@ -116,6 +114,11 @@ namespace Regalo.RavenDB
         {
             if (_documentSession != null)
             {
+                if (_documentSession.Advanced.HasChanges)
+                {
+                    throw new InvalidOperationException("Disposing a delayed-write event store with pending changes. Be sure to call Flush() when all operations are completed.");
+                }
+
                 _documentSession.Dispose();
                 _documentSession = null;
             }

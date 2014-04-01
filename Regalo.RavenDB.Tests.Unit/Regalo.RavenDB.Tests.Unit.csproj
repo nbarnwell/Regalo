@@ -93,6 +93,7 @@
     <Reference Include="Microsoft.CSharp" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DelayedWriteEventStoreTests.cs" />
     <Compile Include="DomainModel\Customers\AccountManager.cs" />
     <Compile Include="DomainModel\Customers\Customer.cs" />
     <Compile Include="DomainModel\Customers\CustomerSignedUp.cs" />
