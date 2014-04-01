@@ -15,6 +15,7 @@ namespace Regalo.Core.Tests.Unit
         private ObjectEventHandler _objectEventHandler;
         private EventHandlerA _eventHandlerA;
         private EventHandlerB _eventHandlerB;
+        private EventBus _eventBus;
 
         [SetUp]
         public void SetUp()
@@ -22,6 +23,8 @@ namespace Regalo.Core.Tests.Unit
             _objectEventHandler = new ObjectEventHandler();
             _eventHandlerA = new EventHandlerA();
             _eventHandlerB = new EventHandlerB();
+            _eventBus = new EventBus(new ConsoleLogger());
+
             Resolver.SetResolvers(type => null, LocateAllEventHandlers);
             Conventions.SetRetryableEventHandlingExceptionFilter(null);
         }
@@ -61,9 +64,7 @@ namespace Regalo.Core.Tests.Unit
                     return LocateAllEventHandlers(type);
                 });
 
-            var processor = new EventBus(new NullLogger());
-
-            processor.Publish(new SimpleEvent());
+            _eventBus.Publish(new SimpleEvent());
 
             CollectionAssert.AreEqual(expected, result);
         }
@@ -78,9 +79,7 @@ namespace Regalo.Core.Tests.Unit
                 typeof(SimpleEvent),
             };
 
-            var processor = new EventBus(new NullLogger());
-
-            processor.Publish(new SimpleEvent());
+            _eventBus.Publish(new SimpleEvent());
 
             _objectEventHandler.TargetsCalled.ToList().ForEach(Console.WriteLine);
 
@@ -102,7 +101,6 @@ namespace Regalo.Core.Tests.Unit
         [Test]
         public void GivenAMessageThatWillFailHandling_WhenAskedToPublish_ShouldGenerateFailedHandlingMessage()
         {
-            var eventBus = new EventBus(new NullLogger());
             var failingEventHandler = new FailingEventHandler();
             Resolver.ClearResolvers();
             Resolver.SetResolvers(
@@ -110,7 +108,7 @@ namespace Regalo.Core.Tests.Unit
                 type => new object[] { failingEventHandler }.Where(x => type.IsAssignableFrom(x.GetType())));
 
             var eventThatWillFailToBeHandled = new SimpleEvent();
-            eventBus.Publish(eventThatWillFailToBeHandled);
+            _eventBus.Publish(eventThatWillFailToBeHandled);
 
             CollectionAssert.AreEqual(
                 new[]
@@ -125,7 +123,6 @@ namespace Regalo.Core.Tests.Unit
         public void GivenAMessageThatWillFailHandling_WhenAskedToPublish_ShouldAllowRetryableExceptionsToPropagate()
         {
             Conventions.SetRetryableEventHandlingExceptionFilter((o, e) => true);
-            var eventBus = new EventBus(new NullLogger());
             var failingEventHandler = new FailingEventHandler();
             Resolver.ClearResolvers();
             Resolver.SetResolvers(
@@ -133,7 +130,7 @@ namespace Regalo.Core.Tests.Unit
                 type => new object[] { failingEventHandler }.Where(x => type.IsAssignableFrom(x.GetType())));
 
             var eventThatWillFailToBeHandled = new SimpleEvent();
-            Assert.Throws<TargetInvocationException>(() => eventBus.Publish(eventThatWillFailToBeHandled));
+            var exception = Assert.Throws<TargetInvocationException>(() => _eventBus.Publish(eventThatWillFailToBeHandled));
 
             CollectionAssert.AreEqual(
                 new[]

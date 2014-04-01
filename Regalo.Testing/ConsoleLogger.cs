@@ -11,13 +11,20 @@ namespace Regalo.Testing
         }
 
         public void Info(object sender, string format, params object[] args)
-        { }
+        {
+            Log(sender, format, args);
+        }
 
         public void Warn(object sender, string format, params object[] args)
-        { }
+        {
+            Log(sender, format, args);
+        }
 
         public void Error(object sender, Exception exception, string format, params object[] args)
-        { }
+        {
+            Log(sender, format, args);
+            Console.WriteLine(exception);
+        }
 
         private void Log(object sender, string format, params object[] args)
         {

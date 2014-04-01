@@ -26,7 +26,7 @@ namespace Regalo.Core
             {
                 if (IsRetryableException(evt, e))
                 {
-                    _logger.Error(this, e, "Failed to handle {0}, allowing retryable exception to propagate...");
+                    _logger.Error(this, e, "Failed to handle {0}, allowing retryable exception to propagate...", evt);
                     throw;
                 }
 
