@@ -13,6 +13,7 @@ namespace Regalo.RavenDB
     {
         private readonly IVersionHandler _versionHandler;
 
+        private bool _hasChanges;
         private IDocumentSession _documentSession;
 
         public DelayedWriteRavenEventStore(IDocumentStore documentStore, IVersionHandler versionHandler)
@@ -31,6 +32,8 @@ namespace Regalo.RavenDB
             _documentSession.Store(stream);
 
             SetRavenCollectionName(events, _documentSession, stream);
+
+            _hasChanges = true;
         }
 
         public void Update(Guid aggregateId, IEnumerable<object> events)
@@ -45,11 +48,14 @@ namespace Regalo.RavenDB
             }
 
             stream.Append(events);
+
+            _hasChanges = true;
         }
 
         public void Flush()
         {
             _documentSession.SaveChanges();
+            _hasChanges = false;
         }
 
         private static void SetRavenCollectionName(IEnumerable<object> events, IDocumentSession session, EventStream stream)
@@ -88,7 +94,7 @@ namespace Regalo.RavenDB
         {
             var events = Load(aggregateId).ToList();
 
-            if (!events.Any(x => _versionHandler.GetVersion(x) == maxVersion))
+            if (events.All(x => _versionHandler.GetVersion(x) != maxVersion))
             {
                 throw new ArgumentOutOfRangeException(
                     "maxVersion",
@@ -114,7 +120,7 @@ namespace Regalo.RavenDB
         {
             if (_documentSession != null)
             {
-                if (_documentSession.Advanced.HasChanges)
+                if (_hasChanges)
                 {
                     throw new InvalidOperationException("Disposing a delayed-write event store with pending changes. Be sure to call Flush() when all operations are completed.");
                 }
