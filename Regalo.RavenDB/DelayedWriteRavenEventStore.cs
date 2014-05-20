@@ -22,6 +22,8 @@ namespace Regalo.RavenDB
             if (versionHandler == null) throw new ArgumentNullException("versionHandler");
 
             _documentSession = documentStore.OpenSession();
+            _documentSession.Advanced.UseOptimisticConcurrency = true;
+
             _versionHandler = versionHandler;
         }
 
