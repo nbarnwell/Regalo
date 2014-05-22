@@ -59,7 +59,13 @@ namespace Regalo.Core.EventSourcing
                 if (baseAndUnseenEvents.Length > 0)
                 {
                     var unseenEvents = GetUnseenEvents(item, baseAndUnseenEvents);
-                    _concurrencyMonitor.CheckForConflicts(unseenEvents, uncommittedEvents);
+                    var conflicts = _concurrencyMonitor.CheckForConflicts(unseenEvents, uncommittedEvents);
+                    if (conflicts.Any())
+                    {
+                        var exception = new ConcurrencyConflictsDetectedException(conflicts);
+                        exception.Data.Add("AggregateId", item.Id);
+                        throw exception;
+                    }
                 }
 
                 _eventStore.Update(item.Id, uncommittedEvents);

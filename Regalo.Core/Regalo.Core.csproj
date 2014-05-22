@@ -53,6 +53,7 @@
     <Compile Include="EventHandlingResultEvent.cs" />
     <Compile Include="EventHandlingSucceededEvent.cs" />
     <Compile Include="EventSourcing\ConcurrencyConflict.cs" />
+    <Compile Include="EventSourcing\ConcurrencyConflictsDetectedException.cs" />
     <Compile Include="EventSourcing\EventSourcingRepository.cs" />
     <Compile Include="EventSourcing\IConcurrencyMonitor.cs" />
     <Compile Include="EventSourcing\IDelayedWriteEventStore.cs" />
