@@ -54,6 +54,7 @@ namespace Regalo.Core
 
         private List<HandlerDescriptor> GetHandlerDescriptors(Type messageHandlerOpenType, Type messageType)
         {
+            // TODO: Re-instate the IsEventHandlingResultEvent() method here
             var isEventHandlingResultEvent = IsEventHandlingSuccessEvent(messageType);
 
             var messageTypes = isEventHandlingResultEvent
