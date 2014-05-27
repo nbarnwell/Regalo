@@ -12,14 +12,18 @@ namespace Regalo.Core.Tests.Unit
             var eventType = typeof(SimpleEvent);
             var loaderUsageCount = 0;
 
-            var cache = new LightweightCache<RuntimeTypeHandle, bool>(
-                typeHandle =>
+            var cache = new LightweightCacheForRuntimeKey<Type, RuntimeTypeHandle, bool>(
+                type =>
+                {
+                    return type.TypeHandle;
+                },
+                (type, typeHandle) =>
                 {
                     loaderUsageCount++;
                     return false;
                 });
 
-            var result = cache.GetValue(eventType.TypeHandle);
+            var result = cache.GetValue(eventType);
 
             Assert.That(result, Is.False);
             Assert.That(loaderUsageCount, Is.EqualTo(1));
@@ -31,17 +35,21 @@ namespace Regalo.Core.Tests.Unit
             var eventType = typeof(SimpleEvent);
             var loaderUsageCount = 0;
 
-            var cache = new LightweightCache<RuntimeTypeHandle, bool>(
-                typeHandle =>
+            var cache = new LightweightCacheForRuntimeKey<Type, RuntimeTypeHandle, bool>(
+                type =>
+                {
+                    return type.TypeHandle;
+                },
+                (type, typeHandle) =>
                 {
                     loaderUsageCount++;
                     return false;
                 });
 
-            var result = cache.GetValue(eventType.TypeHandle);
+            var result = cache.GetValue(eventType);
             Assert.That(result, Is.False);
             
-            result = cache.GetValue(eventType.TypeHandle);
+            result = cache.GetValue(eventType);
             Assert.That(result, Is.False);
 
             Assert.That(loaderUsageCount, Is.EqualTo(1));
@@ -58,16 +66,16 @@ namespace Regalo.Core.Tests.Unit
                 {
                     return type.TypeHandle;
                 },
-                typeHandle =>
+                (type, typeHandle) =>
                 {
                     loaderUsageCount++;
                     return false;
                 });
 
-            var result = cache.GetValue(eventType.TypeHandle);
+            var result = cache.GetValue(eventType);
             Assert.That(result, Is.False);
             
-            result = cache.GetValue(eventType.TypeHandle);
+            result = cache.GetValue(eventType);
             Assert.That(result, Is.False);
 
             Assert.That(loaderUsageCount, Is.EqualTo(1));

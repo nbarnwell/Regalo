@@ -73,7 +73,8 @@
     <Compile Include="IMessageHandlerContext.cs" />
     <Compile Include="IRepository.cs" />
     <Compile Include="IVersionHandler.cs" />
-    <Compile Include="LightweightCache.cs" />
+    <Compile Include="LightweightCacheForKnownKey.cs" />
+    <Compile Include="LightweightCacheForRuntimeKey.cs" />
     <Compile Include="Message.cs" />
     <Compile Include="MessageHandlerContext.cs" />
     <Compile Include="MessageProcessorBase.cs" />
