@@ -58,7 +58,6 @@
     <Compile Include="AggregateTests.cs" />
     <Compile Include="CommandProcessorTests.cs" />
     <Compile Include="EventBusTests.cs" />
-    <Compile Include="LightweightCacheTests.cs" />
     <Compile Include="RuntimeConfiguredVersionHandlerTests.cs" />
     <Compile Include="SimpleConcurrencyTests.cs" />
     <Compile Include="RepositoryTests.cs" />

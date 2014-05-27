@@ -10,6 +10,7 @@ namespace Regalo.Core
         private readonly ILogger _logger;
         private readonly IDictionary<RuntimeTypeHandle, MethodInfo> _handleMethodCache = new Dictionary<RuntimeTypeHandle, MethodInfo>();
         private readonly IDictionary<RuntimeTypeHandle, bool> _eventHandlingSuccessEventTypeCache = new Dictionary<RuntimeTypeHandle, bool>();
+        private readonly IDictionary<RuntimeTypeHandle, bool> _eventHandlingResultEventTypeCache = new Dictionary<RuntimeTypeHandle, bool>();
 
         protected MessageProcessorBase(ILogger logger)
         {
@@ -52,10 +53,21 @@ namespace Regalo.Core
             return result;
         }
 
+        private bool IsEventHandlingResultEvent(Type eventType)
+        {
+            bool result;
+            if (!_eventHandlingResultEventTypeCache.TryGetValue(eventType.TypeHandle, out result))
+            {
+                result = typeof(EventHandlingResultEvent).IsAssignableFrom(eventType);
+                _eventHandlingResultEventTypeCache.Add(eventType.TypeHandle, result);
+            }
+
+            return result;
+        }
+
         private List<HandlerDescriptor> GetHandlerDescriptors(Type messageHandlerOpenType, Type messageType)
         {
-            // TODO: Re-instate the IsEventHandlingResultEvent() method here
-            var isEventHandlingResultEvent = IsEventHandlingSuccessEvent(messageType);
+            var isEventHandlingResultEvent = IsEventHandlingResultEvent(messageType);
 
             var messageTypes = isEventHandlingResultEvent
                                    ? GetEventHandlingResultEventTypeHierarchy(messageType)
