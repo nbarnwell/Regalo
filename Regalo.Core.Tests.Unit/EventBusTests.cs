@@ -93,7 +93,9 @@ namespace Regalo.Core.Tests.Unit
 
             processor.Publish(new EventHandledByMultipleHandlers());
 
-            CollectionAssert.AreEqual(new[] { typeof(object) }, _objectEventHandler.TargetsCalled);
+            // Each called twice the expected number of times due to the EventHandlingSucceededEvent being published
+            CollectionAssert.AreEqual(new[] { typeof(object), typeof(object) }, _objectEventHandler.TargetsCalled);
+
             CollectionAssert.AreEqual(new[] { typeof(EventHandledByMultipleHandlers) }, _eventHandlerA.TargetsCalled);
             CollectionAssert.AreEqual(new[] { typeof(EventHandledByMultipleHandlers) }, _eventHandlerB.TargetsCalled);
         }

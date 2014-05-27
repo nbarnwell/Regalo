@@ -9,6 +9,7 @@ namespace Regalo.Core
     {
         private readonly ILogger _logger;
         private readonly IDictionary<RuntimeTypeHandle, MethodInfo> _handleMethodCache = new Dictionary<RuntimeTypeHandle, MethodInfo>();
+        private readonly IDictionary<RuntimeTypeHandle, bool> _eventHandlingSuccessEventTypeCache = new Dictionary<RuntimeTypeHandle, bool>();
 
         protected MessageProcessorBase(ILogger logger)
         {
@@ -22,9 +23,9 @@ namespace Regalo.Core
 
             var targets = GetHandlerDescriptors(messageHandlerOpenType, messageType);
 
-            // Throw if there are no handlers. Unless it's a success/failure wrapper
+            // Throw if there are no handlers. Unless it's a successwrapper
             // event, for which it's not obligatory to have a handler.
-            if (!IsEventHandlingResultEvent(messageType) && targets.IsEmpty())
+            if (!IsEventHandlingSuccessEvent(message) && targets.IsEmpty())
             {
                 throw new InvalidOperationException(string.Format("No handlers registered for: {0}", message));
             }
@@ -36,15 +37,24 @@ namespace Regalo.Core
             }
         }
 
-        private static bool IsEventHandlingResultEvent(Type type)
+        private bool IsEventHandlingSuccessEvent(object evt)
         {
-            bool result = typeof(EventHandlingResultEvent).IsAssignableFrom(type);
+            var eventType = evt.GetType();
+
+            bool result;
+            if (!_eventHandlingSuccessEventTypeCache.TryGetValue(eventType.TypeHandle, out result))
+            {
+                result = eventType.GetInterfaces()
+                                  .Any(x => x.IsGenericType && x.GetGenericTypeDefinition() == typeof(IEventHandlingSucceededEvent<>));
+                _eventHandlingSuccessEventTypeCache.Add(eventType.TypeHandle, result);
+            }
+
             return result;
         }
 
         private List<HandlerDescriptor> GetHandlerDescriptors(Type messageHandlerOpenType, Type messageType)
         {
-            var isEventHandlingResultEvent = IsEventHandlingResultEvent(messageType);
+            var isEventHandlingResultEvent = IsEventHandlingSuccessEvent(messageType);
 
             var messageTypes = isEventHandlingResultEvent
                                    ? GetEventHandlingResultEventTypeHierarchy(messageType)

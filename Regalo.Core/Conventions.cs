@@ -7,12 +7,17 @@ namespace Regalo.Core
         private static bool _aggregatesMustImplementApplyMethods = false;
         private static string _aggregateIdPropertyName = "AggregateId";
         private static Func<Type, Type> _findAggregateTypeForEventType = null;
-        private static Func<object, Exception, bool> _retryableEventHandlingExceptionFilter = null;
+        private static Func<object, Exception, bool> _eventHandlingExceptionFilter = null;
 
         public static string AggregateIdPropertyName { get { return _aggregateIdPropertyName; } }
         public static bool AggregatesMustImplementApplyMethods { get { return _aggregatesMustImplementApplyMethods; } }
         public static Func<Type, Type> FindAggregateTypeForEventType { get { return _findAggregateTypeForEventType; } }
-        public static Func<object, Exception, bool> RetryableEventPublishingExceptionFilter { get { return _retryableEventHandlingExceptionFilter; } }
+
+        /// <summary>
+        /// If returns true, exception will be "bubbled" to the caller. If false, the framework will attempt to 
+        /// publish an EventHandlingFailedEvent that should be handled by an appropriate handler.
+        /// </summary>
+        public static Func<object, Exception, bool> EventPublishingExceptionFilter { get { return _eventHandlingExceptionFilter; } }
 
         public static void SetAggregateIdPropertyName(string value)
         {
@@ -31,7 +36,7 @@ namespace Regalo.Core
 
         public static void SetRetryableEventHandlingExceptionFilter(Func<object, Exception, bool> retryableEventHandlingExceptionFilter)
         {
-            _retryableEventHandlingExceptionFilter = retryableEventHandlingExceptionFilter;
+            _eventHandlingExceptionFilter = retryableEventHandlingExceptionFilter;
         }
     }
 }

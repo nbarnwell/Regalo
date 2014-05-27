@@ -24,9 +24,9 @@ namespace Regalo.Core
             }
             catch (Exception e)
             {
-                if (IsRetryableException(evt, e))
+                if (ExceptionShouldBubble(evt, e))
                 {
-                    _logger.Error(this, e, "Failed to handle {0}, allowing retryable exception to propagate...", evt);
+                    _logger.Error(this, e, "Failed to handle {0}, allowing exception to propagate...", evt);
                     throw;
                 }
 
@@ -63,9 +63,9 @@ namespace Regalo.Core
             }
         }
 
-        private static bool IsRetryableException(object evt, Exception exception)
+        private static bool ExceptionShouldBubble(object evt, Exception exception)
         {
-            var filter = Conventions.RetryableEventPublishingExceptionFilter;
+            var filter = Conventions.EventPublishingExceptionFilter;
             return filter != null && filter(evt, exception);
         }
     }
